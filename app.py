@@ -1,25 +1,22 @@
-
-from flask import Flask, render_template, request, send_file
+import os
+from flask import Flask, request, send_file
 from fpdf import FPDF
 import io
-import os
 from datetime import datetime
+from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-UPLOAD_FOLDER = 'uploads'
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 factuur_teller = 1
 
 class FactuurPDF(FPDF):
-    def __init__(self, logo_path=None):
+    def __init__(self, logo_stream=None):
         super().__init__()
-        self.logo_path = logo_path
+        self.logo_stream = logo_stream
 
     def header(self):
-        if self.logo_path and os.path.exists(self.logo_path):
-            self.image(self.logo_path, 10, 8, 33)
+        if self.logo_stream:
+            self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
             self.set_xy(50, 10)
         self.set_font('Arial', 'B', 14)
         self.cell(0, 10, 'Factuur', ln=True, align='C')
@@ -28,7 +25,7 @@ class FactuurPDF(FPDF):
     def factuur_body(self, factuurnummer, bedrijfsnaam, klantnaam, diensten):
         self.set_font('Arial', '', 12)
         self.cell(0, 10, f'Factuurnummer: {factuurnummer}', ln=True)
-        self.cell(0, 10, f'Datum: {datetime.today().strftime("%d-%m-%Y")}', ln=True)
+        self.cell(0, 10, f'Datum: {datetime.today().strftime(\"%d-%m-%Y\")}', ln=True)
         self.cell(0, 10, f'Van: {bedrijfsnaam}', ln=True)
         self.cell(0, 10, f'Aan: {klantnaam}', ln=True)
         self.ln(10)
@@ -64,13 +61,11 @@ def index():
         factuur_teller += 1
 
         logo_file = request.files.get('logo')
-        logo_path = None
-
+        logo_stream = None
         if logo_file and logo_file.filename != '':
-            logo_path = os.path.join(app.config['UPLOAD_FOLDER'], logo_file.filename)
-            logo_file.save(logo_path)
+            logo_stream = io.BytesIO(logo_file.read())
 
-        pdf = FactuurPDF(logo_path)
+        pdf = FactuurPDF(logo_stream)
         pdf.add_page()
         pdf.factuur_body(factuurnummer, bedrijfsnaam, klantnaam, diensten)
 
