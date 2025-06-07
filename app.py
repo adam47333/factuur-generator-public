@@ -85,32 +85,78 @@ def index():
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Factuurgenerator</title>
+        <title>Factuur Generator</title>
+        <style>
+            body {
+                background-color: #f4f6f8;
+                font-family: 'Open Sans', sans-serif;
+            }
+            .container {
+                width: 400px;
+                margin: 50px auto;
+                background: white;
+                padding: 20px;
+                box-shadow: 0 0 10px rgba(0,0,0,0.1);
+                border-radius: 10px;
+            }
+            h1 {
+                text-align: center;
+                color: #333;
+            }
+            label {
+                display: block;
+                margin-top: 15px;
+                color: #555;
+            }
+            input[type="text"], input[type="number"], input[type="file"] {
+                width: 100%;
+                padding: 8px;
+                margin-top: 5px;
+                border: 1px solid #ccc;
+                border-radius: 5px;
+            }
+            button {
+                width: 100%;
+                background-color: #007bff;
+                color: white;
+                border: none;
+                padding: 10px;
+                margin-top: 20px;
+                border-radius: 5px;
+                cursor: pointer;
+                font-size: 16px;
+            }
+            button:hover {
+                background-color: #0056b3;
+            }
+        </style>
       </head>
       <body>
-        <h1>Factuur Generator</h1>
-        <form method="POST" enctype="multipart/form-data">
-          <label>Bedrijfsnaam:</label><br>
-          <input type="text" name="bedrijfsnaam" required><br><br>
+        <div class="container">
+            <h1>Factuur Generator</h1>
+            <form method="POST" enctype="multipart/form-data">
+              <label>Bedrijfsnaam:</label>
+              <input type="text" name="bedrijfsnaam" required>
 
-          <label>Klantnaam:</label><br>
-          <input type="text" name="klantnaam" required><br><br>
+              <label>Klantnaam:</label>
+              <input type="text" name="klantnaam" required>
 
-          <label>Dienst 1:</label><br>
-          <input type="text" name="dienst_1" required><br>
-          <label>Prijs 1:</label><br>
-          <input type="number" step="0.01" name="prijs_1" required><br><br>
+              <label>Dienst 1:</label>
+              <input type="text" name="dienst_1" required>
+              <label>Prijs 1:</label>
+              <input type="number" step="0.01" name="prijs_1" required>
 
-          <label>Dienst 2 (optioneel):</label><br>
-          <input type="text" name="dienst_2"><br>
-          <label>Prijs 2:</label><br>
-          <input type="number" step="0.01" name="prijs_2"><br><br>
+              <label>Dienst 2 (optioneel):</label>
+              <input type="text" name="dienst_2">
+              <label>Prijs 2:</label>
+              <input type="number" step="0.01" name="prijs_2">
 
-          <label>Upload jouw logo (optioneel):</label><br>
-          <input type="file" name="logo"><br><br>
+              <label>Upload jouw logo (optioneel):</label>
+              <input type="file" name="logo">
 
-          <button type="submit">Genereer Factuur</button>
-        </form>
+              <button type="submit">Genereer Factuur</button>
+            </form>
+        </div>
       </body>
     </html>
     '''
