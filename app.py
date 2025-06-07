@@ -13,7 +13,7 @@ class FactuurPDF(FPDF):
         super().__init__()
         self.logo_stream = logo_stream
 
-    def header(self, bedrijfsnaam, adres, kvk, btw, iban):
+    def header(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
                 self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
@@ -22,18 +22,22 @@ class FactuurPDF(FPDF):
         self.set_font('Helvetica', 'B', 16)
         self.cell(0, 10, bedrijfsnaam, ln=True)
         self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, adres, ln=True)
+        self.cell(0, 10, straat, ln=True)
+        self.cell(0, 10, f"{postcode} {plaats}", ln=True)
+        self.cell(0, 10, land, ln=True)
         self.cell(0, 10, f"KvK: {kvk} | BTW: {btw}", ln=True)
         self.cell(0, 10, f"IBAN: {iban}", ln=True)
         self.ln(10)
 
-    def factuur_body(self, factuurnummer, klantnaam, klantadres, diensten, bedrijfsnaam):
+    def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam):
         self.set_font('Helvetica', '', 12)
         self.cell(0, 10, f"Factuurnummer: {factuurnummer}    Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
         self.ln(5)
         self.cell(0, 10, f"Aan:", ln=True)
         self.cell(0, 10, klantnaam, ln=True)
-        self.cell(0, 10, klantadres, ln=True)
+        self.cell(0, 10, klant_straat, ln=True)
+        self.cell(0, 10, f"{klant_postcode} {klant_plaats}", ln=True)
+        self.cell(0, 10, klant_land, ln=True)
         self.ln(10)
 
         self.set_font('Helvetica', 'B', 12)
@@ -77,13 +81,19 @@ def index():
 
     if request.method == 'POST':
         bedrijfsnaam = request.form['bedrijfsnaam']
-        adres = request.form['adres']
+        straat = request.form['straat']
+        postcode = request.form['postcode']
+        plaats = request.form['plaats']
+        land = request.form['land']
         kvk = request.form['kvk']
         btw = request.form['btw']
         iban = request.form['iban']
 
         klantnaam = request.form['klantnaam']
-        klantadres = request.form['klantadres']
+        klant_straat = request.form['klant_straat']
+        klant_postcode = request.form['klant_postcode']
+        klant_plaats = request.form['klant_plaats']
+        klant_land = request.form['klant_land']
         diensten = []
 
         index = 0
@@ -105,8 +115,8 @@ def index():
 
         pdf = FactuurPDF(logo_stream)
         pdf.add_page()
-        pdf.header(bedrijfsnaam, adres, kvk, btw, iban)
-        pdf.factuur_body(factuurnummer, klantnaam, klantadres, diensten, bedrijfsnaam)
+        pdf.header(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
+        pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam)
 
         pdf_data = pdf.output(dest='S').encode('latin-1')
 
@@ -123,7 +133,7 @@ def index():
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Factuur Generator - Dynamische Bedrijfsgegevens en BTW</title>
+        <title>Factuur Generator - Volledig Adres</title>
         <style>
             body { background-color: #f4f6f8; font-family: 'Open Sans', sans-serif; }
             .container { width: 400px; margin: 50px auto; background: white; padding: 20px;
@@ -142,8 +152,14 @@ def index():
             <form method="POST" enctype="multipart/form-data" id="factuurForm">
               <label>Bedrijfsnaam:</label>
               <input type="text" name="bedrijfsnaam" required>
-              <label>Adres:</label>
-              <input type="text" name="adres" required>
+              <label>Straat en huisnummer:</label>
+              <input type="text" name="straat" required>
+              <label>Postcode:</label>
+              <input type="text" name="postcode" required>
+              <label>Plaats:</label>
+              <input type="text" name="plaats" required>
+              <label>Land:</label>
+              <input type="text" name="land" required>
               <label>KvK-nummer:</label>
               <input type="text" name="kvk" required>
               <label>BTW-nummer:</label>
@@ -153,8 +169,14 @@ def index():
 
               <label>Klantnaam:</label>
               <input type="text" name="klantnaam" required>
-              <label>Klantadres:</label>
-              <input type="text" name="klantadres" required>
+              <label>Straat en huisnummer:</label>
+              <input type="text" name="klant_straat" required>
+              <label>Postcode:</label>
+              <input type="text" name="klant_postcode" required>
+              <label>Plaats:</label>
+              <input type="text" name="klant_plaats" required>
+              <label>Land:</label>
+              <input type="text" name="klant_land" required>
 
               <div id="diensten"></div>
 
