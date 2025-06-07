@@ -70,13 +70,15 @@ def index():
         pdf.add_page()
         pdf.factuur_body(factuurnummer, bedrijfsnaam, klantnaam, diensten)
 
-       pdf_data = pdf.output(dest='S').encode('latin-1')
-return send_file(
-    io.BytesIO(pdf_data),
-    as_attachment=True,
-    download_name=f'{factuurnummer}.pdf',
-    mimetype='application/pdf'
-)
+        pdf_data = pdf.output(dest='S').encode('latin-1')
+
+        return send_file(
+            io.BytesIO(pdf_data),
+            as_attachment=True,
+            download_name=f'{factuurnummer}.pdf',
+            mimetype='application/pdf'
+        )
+
     return '''
     <!doctype html>
     <html lang="nl">
