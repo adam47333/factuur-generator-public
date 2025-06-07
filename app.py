@@ -137,11 +137,15 @@ def index():
         <title>Snelfactuurtje 🚀</title>
         <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
         <style>
-            body { background-color: #e6f0ff; font-family: 'Poppins', sans-serif; }
-            .container { width: 450px; margin: 50px auto; background: white; padding: 30px;
+            body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; }
+            .container { width: 480px; margin: 50px auto; background: white; padding: 30px;
                          box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 15px; }
-            h1 { text-align: center; color: #007bff; font-size: 28px; }
-            label { display: block; margin-top: 15px; color: #333; font-weight: 500; }
+            h1 { text-align: center; color: #007bff; font-size: 28px; margin-bottom: 30px; }
+            h2 { font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #333; }
+            .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+            .bedrijf { background-color: #e0f0ff; }
+            .klant { background-color: #ffe6cc; }
+            label { display: block; margin-top: 10px; color: #333; font-weight: 500; }
             input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; }
             button { width: 100%; background-color: #007bff; color: white; border: none; padding: 12px;
                      margin-top: 20px; border-radius: 30px; cursor: pointer; font-size: 18px; font-weight: 600; }
@@ -152,33 +156,39 @@ def index():
         <div class="container">
             <h1>Snelfactuurtje 🚀</h1>
             <form method="POST" enctype="multipart/form-data" id="factuurForm">
-              <label>Bedrijfsnaam:</label>
-              <input type="text" name="bedrijfsnaam" required>
-              <label>Straat en huisnummer:</label>
-              <input type="text" name="straat" required>
-              <label>Postcode:</label>
-              <input type="text" name="postcode" required>
-              <label>Plaats:</label>
-              <input type="text" name="plaats" required>
-              <label>Land:</label>
-              <input type="text" name="land" required>
-              <label>KvK-nummer:</label>
-              <input type="text" name="kvk" required>
-              <label>BTW-nummer:</label>
-              <input type="text" name="btw" required>
-              <label>IBAN-nummer:</label>
-              <input type="text" name="iban" required>
+              <div class="block bedrijf">
+                <h2>🏢 Bedrijfsgegevens</h2>
+                <label>Bedrijfsnaam:</label>
+                <input type="text" name="bedrijfsnaam" required>
+                <label>Straat en huisnummer:</label>
+                <input type="text" name="straat" required>
+                <label>Postcode:</label>
+                <input type="text" name="postcode" required>
+                <label>Plaats:</label>
+                <input type="text" name="plaats" required>
+                <label>Land:</label>
+                <input type="text" name="land" required>
+                <label>KvK-nummer:</label>
+                <input type="text" name="kvk" required>
+                <label>BTW-nummer:</label>
+                <input type="text" name="btw" required>
+                <label>IBAN-nummer:</label>
+                <input type="text" name="iban" required>
+              </div>
 
-              <label>Klantnaam:</label>
-              <input type="text" name="klantnaam" required>
-              <label>Straat en huisnummer:</label>
-              <input type="text" name="klant_straat" required>
-              <label>Postcode:</label>
-              <input type="text" name="klant_postcode" required>
-              <label>Plaats:</label>
-              <input type="text" name="klant_plaats" required>
-              <label>Land:</label>
-              <input type="text" name="klant_land" required>
+              <div class="block klant">
+                <h2>👤 Klantgegevens</h2>
+                <label>Klantnaam:</label>
+                <input type="text" name="klantnaam" required>
+                <label>Straat en huisnummer:</label>
+                <input type="text" name="klant_straat" required>
+                <label>Postcode:</label>
+                <input type="text" name="klant_postcode" required>
+                <label>Plaats:</label>
+                <input type="text" name="klant_plaats" required>
+                <label>Land:</label>
+                <input type="text" name="klant_land" required>
+              </div>
 
               <div id="diensten"></div>
 
