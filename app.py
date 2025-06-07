@@ -19,7 +19,7 @@ class FactuurPDF(FPDF):
                 self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
             except Exception as e:
                 print(f"Fout bij laden van logo: {e}")
-        self.set_font('Helvetica', 'B', 14)
+        self.set_font('Helvetica', 'B', 16)
         self.cell(0, 10, 'Factuur', ln=True, align='C')
         self.ln(20)
 
@@ -31,13 +31,23 @@ class FactuurPDF(FPDF):
         self.cell(0, 10, f"Aan: {klantnaam}", ln=True)
         self.ln(10)
 
+        # Tabel koppen
+        self.set_font('Helvetica', 'B', 12)
+        self.cell(120, 10, "Omschrijving", border=1)
+        self.cell(40, 10, "Prijs (EUR)", border=1, ln=True)
+
+        # Tabel inhoud
+        self.set_font('Helvetica', '', 12)
         totaal = 0
         for dienst, prijs in diensten:
-            self.cell(0, 10, f"{dienst}: EUR {prijs:.2f}", ln=True)
+            self.cell(120, 10, dienst, border=1)
+            self.cell(40, 10, f"{prijs:.2f}", border=1, ln=True)
             totaal += prijs
 
-        self.ln(10)
-        self.cell(0, 10, f"Totaal: EUR {totaal:.2f}", ln=True)
+        # Totaal
+        self.set_font('Helvetica', 'B', 12)
+        self.cell(120, 10, 'Totaal', border='T')
+        self.cell(40, 10, f"{totaal:.2f}", border='T', ln=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
