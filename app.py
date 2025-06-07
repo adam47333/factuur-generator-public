@@ -24,19 +24,19 @@ class FactuurPDF(FPDF):
 
     def factuur_body(self, factuurnummer, bedrijfsnaam, klantnaam, diensten):
         self.set_font('Arial', '', 12)
-        self.cell(0, 10, f'Factuurnummer: {factuurnummer}', ln=True)
-        self.cell(0, 10, f'Datum: {datetime.today().strftime(\"%d-%m-%Y\")}', ln=True)
-        self.cell(0, 10, f'Van: {bedrijfsnaam}', ln=True)
-        self.cell(0, 10, f'Aan: {klantnaam}', ln=True)
+        self.cell(0, 10, f"Factuurnummer: {factuurnummer}", ln=True)
+        self.cell(0, 10, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
+        self.cell(0, 10, f"Van: {bedrijfsnaam}", ln=True)
+        self.cell(0, 10, f"Aan: {klantnaam}", ln=True)
         self.ln(10)
 
         totaal = 0
         for dienst, prijs in diensten:
-            self.cell(0, 10, f'{dienst}: €{prijs:.2f}', ln=True)
+            self.cell(0, 10, f"{dienst}: €{prijs:.2f}", ln=True)
             totaal += prijs
 
         self.ln(10)
-        self.cell(0, 10, f'Totaal: €{totaal:.2f}', ln=True)
+        self.cell(0, 10, f"Totaal: €{totaal:.2f}", ln=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
