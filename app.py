@@ -37,29 +37,33 @@ class FactuurPDF(FPDF):
         self.ln(10)
 
         self.set_font('Helvetica', 'B', 12)
-        self.cell(80, 10, "Omschrijving", border=1)
-        self.cell(30, 10, "Aantal", border=1, align='C')
+        self.cell(60, 10, "Omschrijving", border=1)
+        self.cell(20, 10, "Aantal", border=1, align='C')
         self.cell(30, 10, "Prijs", border=1, align='C')
+        self.cell(20, 10, "BTW%", border=1, align='C')
         self.cell(30, 10, "Bedrag", border=1, align='C', ln=True)
 
         self.set_font('Helvetica', '', 12)
         subtotaal = 0
-        for dienst, aantal, prijs in diensten:
-            bedrag = aantal * prijs
-            self.cell(80, 10, dienst, border=1)
-            self.cell(30, 10, str(aantal), border=1, align='C')
+        totaal_btw = 0
+        for dienst, aantal, prijs, btw_percentage in diensten:
+            bedrag_excl = aantal * prijs
+            btw_bedrag = bedrag_excl * (btw_percentage / 100)
+            self.cell(60, 10, dienst, border=1)
+            self.cell(20, 10, str(aantal), border=1, align='C')
             self.cell(30, 10, f"{prijs:.2f}", border=1, align='C')
-            self.cell(30, 10, f"{bedrag:.2f}", border=1, align='C', ln=True)
-            subtotaal += bedrag
+            self.cell(20, 10, f"{btw_percentage}%", border=1, align='C')
+            self.cell(30, 10, f"{(bedrag_excl + btw_bedrag):.2f}", border=1, align='C', ln=True)
+            subtotaal += bedrag_excl
+            totaal_btw += btw_bedrag
 
-        btw = subtotaal * 0.21
-        totaal = subtotaal + btw
+        totaal = subtotaal + totaal_btw
         self.ln(5)
-        self.cell(140, 10, "Subtotaal:", align='R')
+        self.cell(130, 10, "Subtotaal (excl. BTW):", align='R')
         self.cell(30, 10, f"{subtotaal:.2f} EUR", ln=True, align='R')
-        self.cell(140, 10, "BTW (21%):", align='R')
-        self.cell(30, 10, f"{btw:.2f} EUR", ln=True, align='R')
-        self.cell(140, 10, "Totaal:", align='R')
+        self.cell(130, 10, "Totaal BTW:", align='R')
+        self.cell(30, 10, f"{totaal_btw:.2f} EUR", ln=True, align='R')
+        self.cell(130, 10, "Totaal (incl. BTW):", align='R')
         self.set_font('Helvetica', 'B', 12)
         self.cell(30, 10, f"{totaal:.2f} EUR", ln=True, align='R')
         self.ln(20)
@@ -87,7 +91,8 @@ def index():
             dienst = request.form.get(f'dienst_{index}')
             aantal = int(request.form.get(f'aantal_{index}', 1))
             prijs = float(request.form.get(f'prijs_{index}', 0))
-            diensten.append((dienst, aantal, prijs))
+            btw_percentage = float(request.form.get(f'btw_{index}', 21))
+            diensten.append((dienst, aantal, prijs, btw_percentage))
             index += 1
 
         factuurnummer = f"FACT-{datetime.today().year}-{factuur_teller:04d}"
@@ -118,16 +123,14 @@ def index():
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Factuur Generator - Dynamische Bedrijfsgegevens</title>
+        <title>Factuur Generator - Dynamische Bedrijfsgegevens en BTW</title>
         <style>
             body { background-color: #f4f6f8; font-family: 'Open Sans', sans-serif; }
             .container { width: 400px; margin: 50px auto; background: white; padding: 20px;
                          box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; }
             h1 { text-align: center; color: #333; }
             label { display: block; margin-top: 15px; color: #555; }
-            input[type="text"], input[type="number"], input[type="file"] {
-                width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px;
-            }
+            input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
             button { width: 100%; background-color: #007bff; color: white; border: none; padding: 10px;
                      margin-top: 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
             button:hover { background-color: #0056b3; }
@@ -176,6 +179,12 @@ def index():
                       <input type="number" name="aantal_${dienstIndex}" required>
                       <label>Prijs per stuk:</label>
                       <input type="number" step="0.01" name="prijs_${dienstIndex}" required>
+                      <label>BTW-percentage:</label>
+                      <select name="btw_${dienstIndex}" required>
+                          <option value="0">0%</option>
+                          <option value="9">9%</option>
+                          <option value="21" selected>21%</option>
+                      </select>
                   </div>
               `;
               container.insertAdjacentHTML('beforeend', html);
