@@ -1,15 +1,3 @@
-
-1 van 3.899
-(geen onderwerp)
-Inbox
-
-Adam
-Bijlagen
-01:49 (1 minuut geleden)
-aan mij
-
- 1 bijlage
-  • Gescand door Gmail
 from flask import Flask, render_template, request, send_file, redirect, url_for
 import io
 from fpdf import FPDF
