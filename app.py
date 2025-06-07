@@ -3,7 +3,6 @@ from flask import Flask, request, send_file
 from fpdf import FPDF
 import io
 from datetime import datetime
-from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
 
@@ -18,12 +17,12 @@ class FactuurPDF(FPDF):
         if self.logo_stream:
             self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
             self.set_xy(50, 10)
-        self.set_font('Arial', 'B', 14)
+        self.set_font('Helvetica', 'B', 14)
         self.cell(0, 10, 'Factuur', ln=True, align='C')
         self.ln(20)
 
     def factuur_body(self, factuurnummer, bedrijfsnaam, klantnaam, diensten):
-        self.set_font('Arial', '', 12)
+        self.set_font('Helvetica', '', 12)
         self.cell(0, 10, f"Factuurnummer: {factuurnummer}", ln=True)
         self.cell(0, 10, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
         self.cell(0, 10, f"Van: {bedrijfsnaam}", ln=True)
@@ -62,7 +61,7 @@ def index():
 
         logo_file = request.files.get('logo')
         logo_stream = None
-        if logo_file and logo_file.filename != '':
+        if logo_file and logo_file.filename:
             logo_stream = io.BytesIO(logo_file.read())
 
         pdf = FactuurPDF(logo_stream)
