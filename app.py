@@ -1,5 +1,5 @@
 import os
-from flask import Flask, request, send_file
+from flask import Flask, request, send_file, render_template_string
 from fpdf import FPDF
 import io
 from datetime import datetime
@@ -8,7 +8,7 @@ app = Flask(__name__)
 
 factuur_teller = 1
 
-# Bedrijfsgegevens (hier kun jij jouw echte gegevens invullen)
+# Bedrijfsgegevens
 BEDRIJFSNAAM = "Jouw Bedrijf BV"
 BEDRIJF_ADRES = "Adresstraat 1, 1234 AB Stad"
 KVK_NUMMER = "12345678"
@@ -43,25 +43,22 @@ class FactuurPDF(FPDF):
         self.cell(0, 10, klantadres, ln=True)
         self.ln(10)
 
-        # Tabel koppen
         self.set_font('Helvetica', 'B', 12)
         self.cell(80, 10, "Omschrijving", border=1)
         self.cell(30, 10, "Aantal", border=1, align='C')
         self.cell(30, 10, "Prijs", border=1, align='C')
         self.cell(30, 10, "Bedrag", border=1, align='C', ln=True)
 
-        # Tabel inhoud
         self.set_font('Helvetica', '', 12)
         subtotaal = 0
         for dienst, aantal, prijs in diensten:
             bedrag = aantal * prijs
             self.cell(80, 10, dienst, border=1)
-            self.cell(30, 10, f"{aantal}", border=1, align='C')
+            self.cell(30, 10, str(aantal), border=1, align='C')
             self.cell(30, 10, f"{prijs:.2f}", border=1, align='C')
             self.cell(30, 10, f"{bedrag:.2f}", border=1, align='C', ln=True)
             subtotaal += bedrag
 
-        # BTW en totaal
         btw = subtotaal * 0.21
         totaal = subtotaal + btw
         self.ln(5)
@@ -86,17 +83,13 @@ def index():
         klantadres = request.form['klantadres']
         diensten = []
 
-        dienst_1 = request.form['dienst_1']
-        aantal_1 = int(request.form['aantal_1'])
-        prijs_1 = float(request.form['prijs_1'])
-        diensten.append((dienst_1, aantal_1, prijs_1))
-
-        dienst_2 = request.form.get('dienst_2')
-        aantal_2 = request.form.get('aantal_2')
-        prijs_2 = request.form.get('prijs_2')
-
-        if dienst_2 and aantal_2 and prijs_2:
-            diensten.append((dienst_2, int(aantal_2), float(prijs_2)))
+        index = 0
+        while f'dienst_{index}' in request.form:
+            dienst = request.form.get(f'dienst_{index}')
+            aantal = int(request.form.get(f'aantal_{index}', 1))
+            prijs = float(request.form.get(f'prijs_{index}', 0))
+            diensten.append((dienst, aantal, prijs))
+            index += 1
 
         factuurnummer = f"FACT-{datetime.today().year}-{factuur_teller:04d}"
         factuur_teller += 1
@@ -119,81 +112,40 @@ def index():
             mimetype='application/pdf'
         )
 
-    return '''
+    html_content = '''
     <!doctype html>
     <html lang="nl">
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Professionele Factuur Generator</title>
+        <title>Factuur Generator - Onbeperkt Diensten</title>
         <style>
-            body {
-                background-color: #f4f6f8;
-                font-family: 'Open Sans', sans-serif;
-            }
-            .container {
-                width: 400px;
-                margin: 50px auto;
-                background: white;
-                padding: 20px;
-                box-shadow: 0 0 10px rgba(0,0,0,0.1);
-                border-radius: 10px;
-            }
-            h1 {
-                text-align: center;
-                color: #333;
-            }
-            label {
-                display: block;
-                margin-top: 15px;
-                color: #555;
-            }
+            body { background-color: #f4f6f8; font-family: 'Open Sans', sans-serif; }
+            .container { width: 400px; margin: 50px auto; background: white; padding: 20px;
+                         box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; }
+            h1 { text-align: center; color: #333; }
+            label { display: block; margin-top: 15px; color: #555; }
             input[type="text"], input[type="number"], input[type="file"] {
-                width: 100%;
-                padding: 8px;
-                margin-top: 5px;
-                border: 1px solid #ccc;
-                border-radius: 5px;
+                width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px;
             }
-            button {
-                width: 100%;
-                background-color: #007bff;
-                color: white;
-                border: none;
-                padding: 10px;
-                margin-top: 20px;
-                border-radius: 5px;
-                cursor: pointer;
-                font-size: 16px;
-            }
-            button:hover {
-                background-color: #0056b3;
-            }
+            button { width: 100%; background-color: #007bff; color: white; border: none; padding: 10px;
+                     margin-top: 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+            button:hover { background-color: #0056b3; }
         </style>
       </head>
       <body>
         <div class="container">
             <h1>Factuur Generator</h1>
-            <form method="POST" enctype="multipart/form-data">
+            <form method="POST" enctype="multipart/form-data" id="factuurForm">
               <label>Klantnaam:</label>
               <input type="text" name="klantnaam" required>
 
               <label>Klantadres:</label>
               <input type="text" name="klantadres" required>
 
-              <label>Dienst 1:</label>
-              <input type="text" name="dienst_1" required>
-              <label>Aantal 1:</label>
-              <input type="number" name="aantal_1" required>
-              <label>Prijs per stuk 1:</label>
-              <input type="number" step="0.01" name="prijs_1" required>
+              <div id="diensten"></div>
 
-              <label>Dienst 2 (optioneel):</label>
-              <input type="text" name="dienst_2">
-              <label>Aantal 2:</label>
-              <input type="number" name="aantal_2">
-              <label>Prijs per stuk 2:</label>
-              <input type="number" step="0.01" name="prijs_2">
+              <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button>
 
               <label>Upload jouw logo (optioneel):</label>
               <input type="file" name="logo">
@@ -201,9 +153,31 @@ def index():
               <button type="submit">Genereer Factuur</button>
             </form>
         </div>
+
+        <script>
+          let dienstIndex = 0;
+          function voegDienstToe() {
+              const container = document.getElementById('diensten');
+              const html = `
+                  <div>
+                      <label>Dienst:</label>
+                      <input type="text" name="dienst_${dienstIndex}" required>
+                      <label>Aantal:</label>
+                      <input type="number" name="aantal_${dienstIndex}" required>
+                      <label>Prijs per stuk:</label>
+                      <input type="number" step="0.01" name="prijs_${dienstIndex}" required>
+                  </div>
+              `;
+              container.insertAdjacentHTML('beforeend', html);
+              dienstIndex++;
+          }
+          // Voeg standaard 1 dienst toe
+          window.onload = voegDienstToe;
+        </script>
       </body>
     </html>
     '''
+    return render_template_string(html_content)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
