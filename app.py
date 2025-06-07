@@ -8,33 +8,26 @@ app = Flask(__name__)
 
 factuur_teller = 1
 
-# Bedrijfsgegevens
-BEDRIJFSNAAM = "Jouw Bedrijf BV"
-BEDRIJF_ADRES = "Adresstraat 1, 1234 AB Stad"
-KVK_NUMMER = "12345678"
-BTW_NUMMER = "NL123456789B01"
-IBAN = "NL00BANK0123456789"
-
 class FactuurPDF(FPDF):
     def __init__(self, logo_stream=None):
         super().__init__()
         self.logo_stream = logo_stream
 
-    def header(self):
+    def header(self, bedrijfsnaam, adres, kvk, btw, iban):
         if self.logo_stream:
             try:
                 self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
             except Exception as e:
                 print(f"Fout bij laden van logo: {e}")
         self.set_font('Helvetica', 'B', 16)
-        self.cell(0, 10, BEDRIJFSNAAM, ln=True)
+        self.cell(0, 10, bedrijfsnaam, ln=True)
         self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, BEDRIJF_ADRES, ln=True)
-        self.cell(0, 10, f"KvK: {KVK_NUMMER} | BTW: {BTW_NUMMER}", ln=True)
-        self.cell(0, 10, f"IBAN: {IBAN}", ln=True)
+        self.cell(0, 10, adres, ln=True)
+        self.cell(0, 10, f"KvK: {kvk} | BTW: {btw}", ln=True)
+        self.cell(0, 10, f"IBAN: {iban}", ln=True)
         self.ln(10)
 
-    def factuur_body(self, factuurnummer, klantnaam, klantadres, diensten):
+    def factuur_body(self, factuurnummer, klantnaam, klantadres, diensten, bedrijfsnaam):
         self.set_font('Helvetica', '', 12)
         self.cell(0, 10, f"Factuurnummer: {factuurnummer}    Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
         self.ln(5)
@@ -72,13 +65,19 @@ class FactuurPDF(FPDF):
         self.ln(20)
         self.set_font('Helvetica', '', 12)
         self.cell(0, 10, "Met vriendelijke groet,", ln=True)
-        self.cell(0, 10, BEDRIJFSNAAM, ln=True)
+        self.cell(0, 10, bedrijfsnaam, ln=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
     global factuur_teller
 
     if request.method == 'POST':
+        bedrijfsnaam = request.form['bedrijfsnaam']
+        adres = request.form['adres']
+        kvk = request.form['kvk']
+        btw = request.form['btw']
+        iban = request.form['iban']
+
         klantnaam = request.form['klantnaam']
         klantadres = request.form['klantadres']
         diensten = []
@@ -101,7 +100,8 @@ def index():
 
         pdf = FactuurPDF(logo_stream)
         pdf.add_page()
-        pdf.factuur_body(factuurnummer, klantnaam, klantadres, diensten)
+        pdf.header(bedrijfsnaam, adres, kvk, btw, iban)
+        pdf.factuur_body(factuurnummer, klantnaam, klantadres, diensten, bedrijfsnaam)
 
         pdf_data = pdf.output(dest='S').encode('latin-1')
 
@@ -118,7 +118,7 @@ def index():
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Factuur Generator - Onbeperkt Diensten</title>
+        <title>Factuur Generator - Dynamische Bedrijfsgegevens</title>
         <style>
             body { background-color: #f4f6f8; font-family: 'Open Sans', sans-serif; }
             .container { width: 400px; margin: 50px auto; background: white; padding: 20px;
@@ -137,9 +137,19 @@ def index():
         <div class="container">
             <h1>Factuur Generator</h1>
             <form method="POST" enctype="multipart/form-data" id="factuurForm">
+              <label>Bedrijfsnaam:</label>
+              <input type="text" name="bedrijfsnaam" required>
+              <label>Adres:</label>
+              <input type="text" name="adres" required>
+              <label>KvK-nummer:</label>
+              <input type="text" name="kvk" required>
+              <label>BTW-nummer:</label>
+              <input type="text" name="btw" required>
+              <label>IBAN-nummer:</label>
+              <input type="text" name="iban" required>
+
               <label>Klantnaam:</label>
               <input type="text" name="klantnaam" required>
-
               <label>Klantadres:</label>
               <input type="text" name="klantadres" required>
 
@@ -171,7 +181,6 @@ def index():
               container.insertAdjacentHTML('beforeend', html);
               dienstIndex++;
           }
-          // Voeg standaard 1 dienst toe
           window.onload = voegDienstToe;
         </script>
       </body>
