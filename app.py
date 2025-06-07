@@ -15,8 +15,10 @@ class FactuurPDF(FPDF):
 
     def header(self):
         if self.logo_stream:
-            self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
-            self.set_xy(50, 10)
+            try:
+                self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
+            except Exception as e:
+                print(f"Fout bij laden van logo: {e}")
         self.set_font('Helvetica', 'B', 14)
         self.cell(0, 10, 'Factuur', ln=True, align='C')
         self.ln(20)
@@ -31,11 +33,11 @@ class FactuurPDF(FPDF):
 
         totaal = 0
         for dienst, prijs in diensten:
-            self.cell(0, 10, f"{dienst}: €{prijs:.2f}", ln=True)
+            self.cell(0, 10, f"{dienst}: EUR {prijs:.2f}", ln=True)
             totaal += prijs
 
         self.ln(10)
-        self.cell(0, 10, f"Totaal: €{totaal:.2f}", ln=True)
+        self.cell(0, 10, f"Totaal: EUR {totaal:.2f}", ln=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
