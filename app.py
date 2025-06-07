@@ -15,66 +15,69 @@ class FactuurPDF(FPDF):
 
     def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
-            try:
-                self.image(self.logo_stream, x=10, y=8, w=30, type='PNG')
-            except Exception as e:
-                print(f"Fout bij laden van logo: {e}")
-        self.set_font('Helvetica', 'B', 18)
-        self.cell(0, 10, bedrijfsnaam, ln=True, align='R')
-        self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, straat, ln=True, align='R')
-        self.cell(0, 10, f"{postcode} {plaats}", ln=True, align='R')
-        self.cell(0, 10, land, ln=True, align='R')
-        self.cell(0, 10, f"KvK: {kvk} | BTW: {btw}", ln=True, align='R')
-        self.cell(0, 10, f"IBAN: {iban}", ln=True, align='R')
-        self.ln(20)
+            self.image(self.logo_stream, x=90, y=10, w=30)
+            self.ln(30)
+        self.set_font('Helvetica', 'B', 14)
+        self.cell(0, 10, bedrijfsnaam, ln=True, align='L')
+        self.set_font('Helvetica', '', 10)
+        self.cell(0, 6, straat, ln=True, align='L')
+        self.cell(0, 6, f"{postcode} {plaats}", ln=True, align='L')
+        self.cell(0, 6, land, ln=True, align='L')
+        self.cell(0, 6, f"KvK: {kvk}", ln=True, align='L')
+        self.cell(0, 6, f"BTW: {btw}", ln=True, align='L')
+        self.cell(0, 6, f"IBAN: {iban}", ln=True, align='L')
+        self.ln(5)
 
     def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam):
-        self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, f"Factuurnummer: {factuurnummer}", ln=True)
-        self.cell(0, 10, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
-        self.ln(5)
-        self.cell(0, 10, f"Aan:", ln=True)
-        self.cell(0, 10, klantnaam, ln=True)
-        self.cell(0, 10, klant_straat, ln=True)
-        self.cell(0, 10, f"{klant_postcode} {klant_plaats}", ln=True)
-        self.cell(0, 10, klant_land, ln=True)
+        self.set_font('Helvetica', '', 10)
+        self.set_fill_color(240, 240, 240)
+        self.cell(95, 8, 'Factuurnummer:', border=1, fill=True)
+        self.cell(95, 8, factuurnummer, border=1, ln=True)
+        self.cell(95, 8, 'Datum:', border=1, fill=True)
+        self.cell(95, 8, datetime.today().strftime('%d-%m-%Y'), border=1, ln=True)
         self.ln(10)
-
         self.set_font('Helvetica', 'B', 12)
-        self.cell(60, 10, "Omschrijving", border=1, align='C')
-        self.cell(20, 10, "Aantal", border=1, align='C')
-        self.cell(30, 10, "Prijs", border=1, align='C')
-        self.cell(20, 10, "BTW%", border=1, align='C')
-        self.cell(30, 10, "Bedrag", border=1, align='C', ln=True)
+        self.cell(0, 10, 'Factuur aan:', ln=True)
+        self.set_font('Helvetica', '', 10)
+        self.cell(0, 6, klantnaam, ln=True)
+        self.cell(0, 6, klant_straat, ln=True)
+        self.cell(0, 6, f"{klant_postcode} {klant_plaats}", ln=True)
+        self.cell(0, 6, klant_land, ln=True)
+        self.ln(10)
+        self.set_font('Helvetica', 'B', 10)
+        self.cell(80, 8, 'Omschrijving', border=1, align='C')
+        self.cell(20, 8, 'Aantal', border=1, align='C')
+        self.cell(30, 8, 'Prijs', border=1, align='C')
+        self.cell(20, 8, 'BTW%', border=1, align='C')
+        self.cell(30, 8, 'Bedrag', border=1, align='C', ln=True)
 
-        self.set_font('Helvetica', '', 12)
+        self.set_font('Helvetica', '', 10)
         subtotaal = 0
         totaal_btw = 0
         for dienst, aantal, prijs, btw_percentage in diensten:
             bedrag_excl = aantal * prijs
             btw_bedrag = bedrag_excl * (btw_percentage / 100)
-            self.cell(60, 10, dienst, border=1)
-            self.cell(20, 10, str(aantal), border=1, align='C')
-            self.cell(30, 10, f"{prijs:.2f}", border=1, align='C')
-            self.cell(20, 10, f"{btw_percentage}%", border=1, align='C')
-            self.cell(30, 10, f"{(bedrag_excl + btw_bedrag):.2f}", border=1, align='C', ln=True)
+            self.cell(80, 8, dienst, border=1)
+            self.cell(20, 8, str(aantal), border=1, align='C')
+            self.cell(30, 8, f"{prijs:.2f}", border=1, align='C')
+            self.cell(20, 8, f"{btw_percentage}%", border=1, align='C')
+            self.cell(30, 8, f"{(bedrag_excl + btw_bedrag):.2f}", border=1, align='C', ln=True)
             subtotaal += bedrag_excl
             totaal_btw += btw_bedrag
 
         totaal = subtotaal + totaal_btw
         self.ln(5)
-        self.cell(130, 10, "Subtotaal (excl. BTW):", align='R')
-        self.cell(30, 10, f"{subtotaal:.2f} EUR", ln=True, align='R')
-        self.cell(130, 10, "Totaal BTW:", align='R')
-        self.cell(30, 10, f"{totaal_btw:.2f} EUR", ln=True, align='R')
-        self.cell(130, 10, "Totaal (incl. BTW):", align='R')
-        self.set_font('Helvetica', 'B', 12)
-        self.cell(30, 10, f"{totaal:.2f} EUR", ln=True, align='R')
+        self.cell(150, 8, 'Subtotaal (excl. BTW):', border=0, align='R')
+        self.cell(30, 8, f"{subtotaal:.2f} EUR", border=1, align='C', ln=True)
+        self.cell(150, 8, 'Totaal BTW:', border=0, align='R')
+        self.cell(30, 8, f"{totaal_btw:.2f} EUR", border=1, align='C', ln=True)
+        self.cell(150, 8, 'Totaal (incl. BTW):', border=0, align='R')
+        self.set_font('Helvetica', 'B', 10)
+        self.cell(30, 8, f"{totaal:.2f} EUR", border=1, align='C', ln=True)
         self.ln(20)
-        self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, "Met vriendelijke groet,", ln=True)
-        self.cell(0, 10, bedrijfsnaam, ln=True)
+        self.set_font('Helvetica', 'I', 8)
+        self.cell(0, 10, "Gelieve binnen 14 dagen te betalen.", ln=True)
+        self.cell(0, 10, "Factuur gegenereerd via Snelfactuurtje 🚀", ln=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -95,6 +98,7 @@ def index():
         klant_postcode = request.form['klant_postcode']
         klant_plaats = request.form['klant_plaats']
         klant_land = request.form['klant_land']
+        user_factuurnummer = request.form.get('factuurnummer', '').strip()
         diensten = []
 
         index = 0
@@ -106,8 +110,11 @@ def index():
             diensten.append((dienst, aantal, prijs, btw_percentage))
             index += 1
 
-        factuurnummer = f"SNLF-{datetime.today().year}-{factuur_teller:04d}"
-        factuur_teller += 1
+        if user_factuurnummer:
+            factuurnummer = user_factuurnummer
+        else:
+            factuurnummer = f"SNLF-{datetime.today().year}-{factuur_teller:04d}"
+            factuur_teller += 1
 
         logo_file = request.files.get('logo')
         logo_stream = None
@@ -135,9 +142,8 @@ def index():
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
         <title>Snelfactuurtje 🚀</title>
-        <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
         <style>
-            body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+            body { background-color: #f0f4f8; font-family: 'Arial', sans-serif; margin: 0; padding: 0; }
             .container { max-width: 700px; margin: 50px auto; background: white; padding: 30px;
                          box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 15px; }
             h1 { text-align: center; color: #007bff; font-size: 28px; margin-bottom: 30px; }
@@ -156,6 +162,8 @@ def index():
         <div class="container">
             <h1>Snelfactuurtje 🚀</h1>
             <form method="POST" enctype="multipart/form-data" id="factuurForm">
+              <label>Factuurnummer (optioneel):</label>
+              <input type="text" name="factuurnummer" placeholder="Laat leeg voor automatisch nummer">
               <div class="block bedrijf">
                 <h2>🏢 Bedrijfsgegevens</h2>
                 <label>Bedrijfsnaam:</label>
