@@ -16,22 +16,23 @@ class FactuurPDF(FPDF):
     def header(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
-                self.image(self.logo_stream, x=10, y=8, w=33, type='PNG')
+                self.image(self.logo_stream, x=10, y=8, w=30, type='PNG')
             except Exception as e:
                 print(f"Fout bij laden van logo: {e}")
-        self.set_font('Helvetica', 'B', 16)
-        self.cell(0, 10, bedrijfsnaam, ln=True)
+        self.set_font('Helvetica', 'B', 18)
+        self.cell(0, 10, bedrijfsnaam, ln=True, align='R')
         self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, straat, ln=True)
-        self.cell(0, 10, f"{postcode} {plaats}", ln=True)
-        self.cell(0, 10, land, ln=True)
-        self.cell(0, 10, f"KvK: {kvk} | BTW: {btw}", ln=True)
-        self.cell(0, 10, f"IBAN: {iban}", ln=True)
-        self.ln(10)
+        self.cell(0, 10, straat, ln=True, align='R')
+        self.cell(0, 10, f"{postcode} {plaats}", ln=True, align='R')
+        self.cell(0, 10, land, ln=True, align='R')
+        self.cell(0, 10, f"KvK: {kvk} | BTW: {btw}", ln=True, align='R')
+        self.cell(0, 10, f"IBAN: {iban}", ln=True, align='R')
+        self.ln(20)
 
     def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam):
         self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, f"Factuurnummer: {factuurnummer}    Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
+        self.cell(0, 10, f"Factuurnummer: {factuurnummer}", ln=True)
+        self.cell(0, 10, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
         self.ln(5)
         self.cell(0, 10, f"Aan:", ln=True)
         self.cell(0, 10, klantnaam, ln=True)
@@ -41,7 +42,7 @@ class FactuurPDF(FPDF):
         self.ln(10)
 
         self.set_font('Helvetica', 'B', 12)
-        self.cell(60, 10, "Omschrijving", border=1)
+        self.cell(60, 10, "Omschrijving", border=1, align='C')
         self.cell(20, 10, "Aantal", border=1, align='C')
         self.cell(30, 10, "Prijs", border=1, align='C')
         self.cell(20, 10, "BTW%", border=1, align='C')
@@ -105,7 +106,7 @@ def index():
             diensten.append((dienst, aantal, prijs, btw_percentage))
             index += 1
 
-        factuurnummer = f"FACT-{datetime.today().year}-{factuur_teller:04d}"
+        factuurnummer = f"SNLF-{datetime.today().year}-{factuur_teller:04d}"
         factuur_teller += 1
 
         logo_file = request.files.get('logo')
@@ -133,22 +134,23 @@ def index():
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-        <title>Factuur Generator - Volledig Adres</title>
+        <title>Snelfactuurtje 🚀</title>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
         <style>
-            body { background-color: #f4f6f8; font-family: 'Open Sans', sans-serif; }
-            .container { width: 400px; margin: 50px auto; background: white; padding: 20px;
-                         box-shadow: 0 0 10px rgba(0,0,0,0.1); border-radius: 10px; }
-            h1 { text-align: center; color: #333; }
-            label { display: block; margin-top: 15px; color: #555; }
-            input, select { width: 100%; padding: 8px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
-            button { width: 100%; background-color: #007bff; color: white; border: none; padding: 10px;
-                     margin-top: 20px; border-radius: 5px; cursor: pointer; font-size: 16px; }
+            body { background-color: #e6f0ff; font-family: 'Poppins', sans-serif; }
+            .container { width: 450px; margin: 50px auto; background: white; padding: 30px;
+                         box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 15px; }
+            h1 { text-align: center; color: #007bff; font-size: 28px; }
+            label { display: block; margin-top: 15px; color: #333; font-weight: 500; }
+            input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; }
+            button { width: 100%; background-color: #007bff; color: white; border: none; padding: 12px;
+                     margin-top: 20px; border-radius: 30px; cursor: pointer; font-size: 18px; font-weight: 600; }
             button:hover { background-color: #0056b3; }
         </style>
       </head>
       <body>
         <div class="container">
-            <h1>Factuur Generator</h1>
+            <h1>Snelfactuurtje 🚀</h1>
             <form method="POST" enctype="multipart/form-data" id="factuurForm">
               <label>Bedrijfsnaam:</label>
               <input type="text" name="bedrijfsnaam" required>
@@ -180,12 +182,12 @@ def index():
 
               <div id="diensten"></div>
 
-              <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button>
+              <button type="button" onclick="voegDienstToe()">➕ Dienst toevoegen</button>
 
               <label>Upload jouw logo (optioneel):</label>
               <input type="file" name="logo">
 
-              <button type="submit">Genereer Factuur</button>
+              <button type="submit">📄 Factuur Downloaden</button>
             </form>
         </div>
 
