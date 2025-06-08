@@ -233,8 +233,27 @@ def index():
 <div class='container'>
   <h1>Snelfactuurtje 🚀</h1>
   <form method='POST' enctype='multipart/form-data'>
-    <label>Factuurnummer:</label>
-    <input name='factuurnummer' placeholder='Bijv. FACT-2025-001' required>
+    <div class='block bedrijf'>
+      <h2>🏢 Bedrijfsgegevens</h2>
+      <label>Factuurnummer:</label>
+      <input name='factuurnummer' placeholder='Bijv. FACT-2025-001' required>
+      <label>Bedrijfsnaam:</label>
+      <input name='bedrijfsnaam' required>
+      <label>Straat en huisnummer:</label>
+      <input name='straat' required>
+      <label>Postcode:</label>
+      <input name='postcode' required>
+      <label>Plaats:</label>
+      <input name='plaats' required>
+      <label>Land:</label>
+      <input name='land' required>
+      <label>KvK-nummer:</label>
+      <input name='kvk' required>
+      <label>BTW-nummer:</label>
+      <input name='btw' required>
+      <label>IBAN-nummer:</label>
+      <input name='iban' required>
+    </div>
 
     <div class="block bedrijf">
       <h2>🏢 Bedrijfsgegevens</h2>
