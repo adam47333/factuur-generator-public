@@ -43,7 +43,6 @@ class FactuurPDF(FPDF):
         self.cell(0, 8, klant_land, ln=True)
         self.ln(10)
 
-        # Tabel kop
         self.set_fill_color(230, 230, 250)
         self.set_font('Helvetica', 'B', 11)
         self.cell(80, 10, "Omschrijving", border=1, align='C', fill=True)
@@ -53,7 +52,6 @@ class FactuurPDF(FPDF):
         self.cell(30, 10, "Bedrag", border=1, align='C', fill=True)
         self.ln()
 
-        # Tabel inhoud
         self.set_font('Helvetica', '', 11)
         subtotaal = 0
         totaal_btw = 0
@@ -300,9 +298,7 @@ def index():
     }
   </script>
 </body>
-</html>
-
-"""
+</html>"""
     return render_template_string(html_content)
 
 if __name__ == '__main__':
