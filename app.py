@@ -13,7 +13,6 @@ def add_header(response):
     response.headers["Content-Type"] = "text/html; charset=utf-8"
     return response
 
-
 class FactuurPDF(FPDF):
     def __init__(self, logo_stream=None):
         super().__init__()
@@ -29,97 +28,88 @@ class FactuurPDF(FPDF):
                 temp_logo_path = 'temp_logo.png'
                 with open(temp_logo_path, 'wb') as f:
                     f.write(self.logo_stream.read())
-                self.image(temp_logo_path, x=10, y=10, w=40)
+                self.image(temp_logo_path, x=10, y=8, w=40)
                 os.remove(temp_logo_path)
             except Exception as e:
                 print(f"Fout bij laden van logo: {e}")
-
         self.set_font('Helvetica', 'B', 14)
-        self.set_xy(150, 10)
-        self.multi_cell(50, 6, self.capitalize_text(bedrijfsnaam), align='R')
-        self.set_font('Helvetica', '', 11)
-        self.set_x(150)
-        self.multi_cell(50, 5, straat, align='R')
-        self.set_x(150)
-        self.multi_cell(50, 5, f"{postcode} {self.capitalize_text(plaats)}", align='R')
-        self.set_x(150)
-        self.multi_cell(50, 5, self.capitalize_text(land), align='R')
-        self.set_x(150)
-        self.multi_cell(50, 5, f"KvK: {kvk}", align='R')
-        self.set_x(150)
-        self.multi_cell(50, 5, f"BTW: {btw}", align='R')
-        self.set_x(150)
-        self.multi_cell(50, 5, f"IBAN: {iban}", align='R')
-        self.ln(20)
+        self.cell(0, 10, self.capitalize_text(bedrijfsnaam), ln=True, align='R')
+        self.set_font('Helvetica', '', 10)
+        self.cell(0, 6, straat, ln=True, align='R')
+        self.cell(0, 6, f"{postcode} {self.capitalize_text(plaats)}", ln=True, align='R')
+        self.cell(0, 6, self.capitalize_text(land), ln=True, align='R')
+        self.cell(0, 6, f"KvK: {kvk} | BTW: {btw}", ln=True, align='R')
+        self.cell(0, 6, f"IBAN: {iban}", ln=True, align='R')
+        self.ln(5)
         self.set_line_width(0.5)
+        self.set_draw_color(200, 200, 200)
         self.line(10, self.get_y(), 200, self.get_y())
         self.ln(10)
 
     def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam, handtekening_stream=None):
-        self.set_font('Helvetica', '', 11)
-        self.cell(0, 8, f"Factuurnummer: {factuurnummer}", ln=True)
-        self.cell(0, 8, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
-        self.ln(10)
+        self.set_font('Helvetica', '', 10)
+        self.cell(0, 6, f"Factuurnummer: {factuurnummer}", ln=True)
+        self.cell(0, 6, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
+        self.ln(8)
         self.set_font('Helvetica', 'B', 12)
         self.cell(0, 8, "Factuur aan:", ln=True)
-        self.set_font('Helvetica', '', 11)
-        self.cell(0, 8, self.capitalize_text(klantnaam), ln=True)
-        self.cell(0, 8, klant_straat, ln=True)
-        self.cell(0, 8, f"{klant_postcode} {self.capitalize_text(klant_plaats)}", ln=True)
-        self.cell(0, 8, self.capitalize_text(klant_land), ln=True)
-        self.ln(10)
+        self.set_font('Helvetica', '', 10)
+        self.cell(0, 6, self.capitalize_text(klantnaam), ln=True)
+        self.cell(0, 6, klant_straat, ln=True)
+        self.cell(0, 6, f"{klant_postcode} {self.capitalize_text(klant_plaats)}", ln=True)
+        self.cell(0, 6, self.capitalize_text(klant_land), ln=True)
+        self.ln(8)
 
-        self.set_fill_color(230, 230, 250)
-        self.set_font('Helvetica', 'B', 11)
-        self.cell(80, 10, "Omschrijving", border=1, align='C', fill=True)
-        self.cell(25, 10, "Aantal", border=1, align='C', fill=True)
-        self.cell(30, 10, "Prijs", border=1, align='C', fill=True)
-        self.cell(20, 10, "BTW%", border=1, align='C', fill=True)
-        self.cell(35, 10, "Bedrag", border=1, align='C', fill=True)
+        self.set_fill_color(240, 240, 240)
+        self.set_font('Helvetica', 'B', 10)
+        self.cell(70, 8, "Omschrijving", border=1, align='C', fill=True)
+        self.cell(20, 8, "Aantal", border=1, align='C', fill=True)
+        self.cell(30, 8, "Prijs", border=1, align='C', fill=True)
+        self.cell(20, 8, "BTW%", border=1, align='C', fill=True)
+        self.cell(30, 8, "Bedrag", border=1, align='C', fill=True)
         self.ln()
 
-        self.set_font('Helvetica', '', 11)
+        self.set_font('Helvetica', '', 10)
         subtotaal = 0
         totaal_btw = 0
         for dienst, aantal, prijs, btw_percentage in diensten:
             bedrag_excl = aantal * prijs
             btw_bedrag = bedrag_excl * (btw_percentage / 100)
-            bedrag_incl = bedrag_excl + btw_btw_bedrag
-            self.cell(80, 10, dienst, border=1)
-            self.cell(25, 10, str(aantal), border=1, align='C')
-            self.cell(30, 10, f"{prijs:.2f}", border=1, align='R')
-            self.cell(20, 10, f"{btw_percentage}%", border=1, align='C')
-            self.cell(35, 10, f"{bedrag_incl:.2f}", border=1, align='R')
+            bedrag_incl = bedrag_excl + btw_bedrag
+            self.cell(70, 8, dienst, border=1)
+            self.cell(20, 8, str(aantal), border=1, align='C')
+            self.cell(30, 8, f"{prijs:.2f}", border=1, align='R')
+            self.cell(20, 8, f"{btw_percentage}%", border=1, align='C')
+            self.cell(30, 8, f"{bedrag_incl:.2f}", border=1, align='R')
             self.ln()
             subtotaal += bedrag_excl
-            totaal_btw += btw_btw_bedrag
+            totaal_btw += btw_bedrag
 
         totaal = subtotaal + totaal_btw
         self.ln(5)
-        self.set_font('Helvetica', 'B', 12)
-        self.cell(160, 10, "Subtotaal (excl. BTW):", border=0, align='R')
-        self.cell(30, 10, f"{subtotaal:.2f} EUR", border=0, align='R', ln=True)
-        self.cell(160, 10, "Totaal BTW:", border=0, align='R')
-        self.cell(30, 10, f"{totaal_btw:.2f} EUR", border=0, align='R', ln=True)
-        self.cell(160, 10, "Totaal (incl. BTW):", border=0, align='R')
-        self.cell(30, 10, f"{totaal:.2f} EUR", border=0, align='R', ln=True)
-        self.ln(20)
+        self.set_font('Helvetica', 'B', 11)
+        self.cell(140, 8, "Subtotaal (excl. BTW):", align='R')
+        self.cell(40, 8, f"{subtotaal:.2f} EUR", ln=True, align='R')
+        self.cell(140, 8, "Totaal BTW:", align='R')
+        self.cell(40, 8, f"{totaal_btw:.2f} EUR", ln=True, align='R')
+        self.cell(140, 8, "Totaal (incl. BTW):", align='R')
+        self.cell(40, 8, f"{totaal:.2f} EUR", ln=True, align='R')
+        self.ln(15)
 
-        self.set_font('Helvetica', '', 11)
-        self.cell(0, 8, "Met vriendelijke groet,", ln=True)
-        self.cell(0, 8, self.capitalize_text(bedrijfsnaam), ln=True)
+        self.set_font('Helvetica', '', 10)
+        self.cell(0, 6, "Met vriendelijke groet,", ln=True)
+        self.cell(0, 6, self.capitalize_text(bedrijfsnaam), ln=True)
 
         if handtekening_stream:
             if self.get_y() > 250:
                 self.add_page()
-            self.ln(20)
-            self.cell(0, 8, "Handtekening:", ln=True)
+            self.ln(15)
+            self.cell(0, 6, "Handtekening:", ln=True)
             temp_handtekening_path = 'temp_handtekening.png'
             with open(temp_handtekening_path, 'wb') as f:
                 f.write(handtekening_stream.getbuffer())
             self.image(temp_handtekening_path, x=10, y=self.get_y(), w=60)
             os.remove(temp_handtekening_path)
-
     def __init__(self, logo_stream=None):
         super().__init__()
         self.logo_stream = logo_stream
