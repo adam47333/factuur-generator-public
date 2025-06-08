@@ -15,13 +15,11 @@ class FactuurPDF(FPDF):
     def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
-                
-temp_logo_path = 'temp_logo.png'
-with open(temp_logo_path, 'wb') as f:
-    f.write(self.logo_stream.getbuffer())
-self.image(temp_logo_path, x=10, y=8, w=40)
-os.remove(temp_logo_path)
-
+                temp_logo_path = 'temp_logo.png'
+                with open(temp_logo_path, 'wb') as f:
+                    f.write(self.logo_stream.getbuffer())
+                self.image(temp_logo_path, x=10, y=8, w=40)
+                os.remove(temp_logo_path)
             except Exception as e:
                 print(f"Fout bij laden van logo: {e}")
         self.set_font('Helvetica', 'B', 16)
@@ -90,15 +88,13 @@ os.remove(temp_logo_path)
         self.cell(0, 8, bedrijfsnaam, ln=True)
 
         if handtekening_stream:
+            temp_handtekening_path = 'temp_handtekening.png'
+            with open(temp_handtekening_path, 'wb') as f:
+                f.write(handtekening_stream.getbuffer())
             self.ln(20)
             self.cell(0, 8, "Handtekening:", ln=True)
-            
-temp_handtekening_path = 'temp_handtekening.png'
-with open(temp_handtekening_path, 'wb') as f:
-    f.write(handtekening_stream.getbuffer())
-self.image(temp_handtekening_path, x=10, y=self.get_y(), w=60)
-os.remove(temp_handtekening_path)
-
+            self.image(temp_handtekening_path, x=10, y=self.get_y(), w=60)
+            os.remove(temp_handtekening_path)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -134,7 +130,6 @@ def index():
             logo_stream = None
             if logo_file and logo_file.filename:
                 logo_stream = io.BytesIO(logo_file.read())
-                logo_stream.name = 'logo.png'
 
             handtekening_data = request.form.get('handtekening')
             handtekening_stream = None
@@ -142,7 +137,6 @@ def index():
                 header, encoded = handtekening_data.split(",", 1)
                 handtekening_bytes = base64.b64decode(encoded)
                 handtekening_stream = io.BytesIO(handtekening_bytes)
-                handtekening_stream.name = 'handtekening.png'
 
             pdf = FactuurPDF(logo_stream)
             pdf.add_page()
@@ -160,8 +154,7 @@ def index():
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
 
-    # Volledige HTML komt hier
-    html_content = """
+    html_content = '''
 <!doctype html>
 <html lang="nl">
 <head>
@@ -255,13 +248,13 @@ def index():
 </head>
 <body>
   <div class="container">
-    <h1>Snelfactuurtje 🚀</h1>
+    <h1>Snelfactuurtje ðŸš€</h1>
     <form method="POST" enctype="multipart/form-data">
       <label>Factuurnummer:</label>
       <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
 
       <div class="block bedrijf">
-        <h2>🏢 Bedrijfsgegevens</h2>
+        <h2>ðŸ ¢ Bedrijfsgegevens</h2>
         <label>Bedrijfsnaam:</label>
         <input name="bedrijfsnaam" required>
         <label>Straat en huisnummer:</label>
@@ -281,7 +274,7 @@ def index():
       </div>
 
       <div class="block klant">
-        <h2>🧑‍💼 Klantgegevens</h2>
+        <h2>ðŸ§‘â€ ðŸ’¼ Klantgegevens</h2>
         <label>Klantnaam:</label>
         <input name="klantnaam" required>
         <label>Straat en huisnummer:</label>
@@ -295,17 +288,17 @@ def index():
       </div>
 
       <div id="diensten"></div>
-      <button type="button" onclick="voegDienstToe()">➕ Dienst toevoegen</button>
+      <button type="button" onclick="voegDienstToe()">âž• Dienst toevoegen</button>
 
       <label>Upload jouw logo (optioneel):</label>
       <input type="file" name="logo">
 
-      <h2>✍️ Handtekening</h2>
+      <h2>âœ ï¸ Handtekening</h2>
       <canvas id="signature-pad"></canvas>
-      <button type="button" onclick="clearSignature()">🗑️ Handtekening wissen</button>
+      <button type="button" onclick="clearSignature()">ðŸ—‘ï¸ Handtekening wissen</button>
       <input type="hidden" id="handtekening" name="handtekening">
 
-      <button type="submit">📄 Factuur Downloaden</button>
+      <button type="submit">ðŸ“„ Factuur Downloaden</button>
     </form>
   </div>
 
@@ -317,7 +310,7 @@ def index():
       const div = document.createElement('div');
       div.className = 'dienst-block';
       div.innerHTML = `
-        <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>×</button>
+        <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>Ã—</button>
         <label>Dienst:</label>
         <input name='dienst_${dienstIndex}' required>
         <label>Aantal:</label>
@@ -353,7 +346,7 @@ def index():
   </script>
 </body>
 </html>
-"""  # Placeholder nu
+'''
     return render_template_string(html_content)
 
 if __name__ == '__main__':
