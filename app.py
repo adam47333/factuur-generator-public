@@ -7,6 +7,11 @@ import base64
 
 app = Flask(__name__)
 
+@app.after_request
+def add_header(response):
+    response.headers["Content-Type"] = "text/html; charset=utf-8"
+    return response
+
 class FactuurPDF(FPDF):
     def __init__(self, logo_stream=None):
         super().__init__()
@@ -158,7 +163,7 @@ def index():
 <!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="utf-8">
+  <meta charset="UTF-8">
   <title>Snelfactuurtje</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
