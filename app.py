@@ -198,7 +198,7 @@ def index():
     <div class="block bedrijf">
     <h2>Bedrijfsgegevens</h2>
     
-        <h2>Bedrijfsgegevens</h2>
+        
         <label>Bedrijfsnaam:</label>
         <input name="bedrijfsnaam" required>
         <label>Straat en huisnummer:</label>
