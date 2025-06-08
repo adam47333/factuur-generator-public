@@ -240,11 +240,47 @@ def index():
       <input type="hidden" id="handtekening" name="handtekening">
 
       <button type="submit">Factuur Downloaden</button>
+    
+    <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
+    <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
     </form>
+    
   </div>
 
   
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js">
+    function saveCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const value = document.querySelector(`[name="${field}"]`).value;
+        localStorage.setItem(field, value);
+      });
+      alert('Bedrijfsgegevens opgeslagen!');
+    }
+
+    function loadCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const saved = localStorage.getItem(field);
+        if (saved) {
+          document.querySelector(`[name="${field}"]`).value = saved;
+        }
+      });
+    }
+
+    function clearCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        localStorage.removeItem(field);
+      });
+      alert('Bedrijfsgegevens gewist!');
+    }
+
+    window.onload = function() {
+      loadCompanyInfo();
+    };
+    </script>
+    
 <script>
     var canvas = document.getElementById('signature-pad');
     function resizeCanvas() {
@@ -269,7 +305,39 @@ def index():
     }
 
     document.querySelector("form").addEventListener("submit", saveSignature);
-</script>
+
+    function saveCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const value = document.querySelector(`[name="${field}"]`).value;
+        localStorage.setItem(field, value);
+      });
+      alert('Bedrijfsgegevens opgeslagen!');
+    }
+
+    function loadCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const saved = localStorage.getItem(field);
+        if (saved) {
+          document.querySelector(`[name="${field}"]`).value = saved;
+        }
+      });
+    }
+
+    function clearCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        localStorage.removeItem(field);
+      });
+      alert('Bedrijfsgegevens gewist!');
+    }
+
+    window.onload = function() {
+      loadCompanyInfo();
+    };
+    </script>
+    
 
   <script>
     let dienstIndex = 0;
@@ -311,7 +379,39 @@ def index():
     }
 
     document.querySelector("form").addEventListener("submit", saveSignature);
-  </script>
+  
+    function saveCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const value = document.querySelector(`[name="${field}"]`).value;
+        localStorage.setItem(field, value);
+      });
+      alert('Bedrijfsgegevens opgeslagen!');
+    }
+
+    function loadCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const saved = localStorage.getItem(field);
+        if (saved) {
+          document.querySelector(`[name="${field}"]`).value = saved;
+        }
+      });
+    }
+
+    function clearCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        localStorage.removeItem(field);
+      });
+      alert('Bedrijfsgegevens gewist!');
+    }
+
+    window.onload = function() {
+      loadCompanyInfo();
+    };
+    </script>
+    
 </body>
 </html>
 '''
