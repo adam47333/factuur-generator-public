@@ -13,7 +13,7 @@ class FactuurPDF(FPDF):
         super().__init__()
         self.logo_stream = logo_stream
 
-    def header(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
+    def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
                 self.image(self.logo_stream, x=10, y=8, w=30, type='PNG')
@@ -116,7 +116,7 @@ def index():
 
         pdf = FactuurPDF(logo_stream)
         pdf.add_page()
-        pdf.header(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
+        pdf.header_custom(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
         pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam)
 
         pdf_data = pdf.output(dest='S').encode('latin-1')
@@ -137,8 +137,8 @@ def index():
         <title>Snelfactuurtje 🚀</title>
         <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
         <style>
-            body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; }
-            .container { width: 480px; margin: 50px auto; background: white; padding: 30px;
+            body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 0; }
+            .container { max-width: 700px; margin: 50px auto; background: white; padding: 30px;
                          box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-radius: 15px; }
             h1 { text-align: center; color: #007bff; font-size: 28px; margin-bottom: 30px; }
             h2 { font-size: 18px; margin-top: 20px; margin-bottom: 10px; color: #333; }
@@ -146,7 +146,7 @@ def index():
             .bedrijf { background-color: #e0f0ff; }
             .klant { background-color: #ffe6cc; }
             label { display: block; margin-top: 10px; color: #333; font-weight: 500; }
-            input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; }
+            input, select { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
             button { width: 100%; background-color: #007bff; color: white; border: none; padding: 12px;
                      margin-top: 20px; border-radius: 30px; cursor: pointer; font-size: 18px; font-weight: 600; }
             button:hover { background-color: #0056b3; }
