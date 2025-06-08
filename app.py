@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-
 import os
 from flask import Flask, request, send_file, render_template_string, abort
 from fpdf import FPDF
@@ -169,99 +168,30 @@ def index():
   <title>Snelfactuurtje</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
-    body {
-      background-color: #f0f4f8;
-      font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 20px;
-    }
-    .container {
-      max-width: 700px;
-      margin: auto;
-      background: white;
-      padding: 30px;
-      border-radius: 15px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
-    }
-    h1 {
-      text-align: center;
-      color: #007bff;
-    }
-    .block {
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-    .bedrijf {
-      background-color: #e0f0ff;
-    }
-    .klant {
-      background-color: #ffe6cc;
-    }
-    label {
-      display: block;
-      margin-top: 10px;
-      font-weight: 500;
-    }
-    input, select {
-      width: 100%;
-      padding: 10px;
-      margin-top: 5px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-    }
-    .dienst-block {
-      border: 1px solid #ccc;
-      padding: 10px;
-      border-radius: 10px;
-      margin-top: 10px;
-      position: relative;
-    }
-    .remove-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background-color: red;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 25px;
-      height: 25px;
-      cursor: pointer;
-    }
-    button {
-      width: 100%;
-      padding: 12px;
-      margin-top: 20px;
-      border: none;
-      border-radius: 30px;
-      background-color: #007bff;
-      color: white;
-      font-size: 18px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-    button:hover {
-      background-color: #0056b3;
-    }
-    canvas {
-      border: 1px solid #ccc;
-      border-radius: 8px;
-      margin-top: 10px;
-      width: 100%;
-      height: 150px;
-    }
+    body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; }
+    .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #007bff; }
+    .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .bedrijf { background-color: #e0f0ff; }
+    .klant { background-color: #ffe6cc; }
+    label { display: block; margin-top: 10px; font-weight: 500; }
+    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; }
+    .dienst-block { border: 1px solid #ccc; padding: 10px; border-radius: 10px; margin-top: 10px; position: relative; }
+    .remove-btn { position: absolute; top: 10px; right: 10px; background-color: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
+    button { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 30px; background-color: #007bff; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+    button:hover { background-color: #0056b3; }
+    canvas { border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; width: 100%; height: 150px; }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Snelfactuurtje ðŸš€</h1>
+    <h1>Snelfactuurtje</h1>
     <form method="POST" enctype="multipart/form-data">
       <label>Factuurnummer:</label>
       <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
 
       <div class="block bedrijf">
-        <h2>ðŸ ¢ Bedrijfsgegevens</h2>
+        <h2>Bedrijfsgegevens</h2>
         <label>Bedrijfsnaam:</label>
         <input name="bedrijfsnaam" required>
         <label>Straat en huisnummer:</label>
@@ -281,7 +211,7 @@ def index():
       </div>
 
       <div class="block klant">
-        <h2>ðŸ§‘â€ ðŸ’¼ Klantgegevens</h2>
+        <h2>Klantgegevens</h2>
         <label>Klantnaam:</label>
         <input name="klantnaam" required>
         <label>Straat en huisnummer:</label>
@@ -295,17 +225,17 @@ def index():
       </div>
 
       <div id="diensten"></div>
-      <button type="button" onclick="voegDienstToe()">âž• Dienst toevoegen</button>
+      <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button>
 
       <label>Upload jouw logo (optioneel):</label>
       <input type="file" name="logo">
 
-      <h2>âœ ï¸ Handtekening</h2>
+      <h2>Handtekening</h2>
       <canvas id="signature-pad"></canvas>
-      <button type="button" onclick="clearSignature()">ðŸ—‘ï¸ Handtekening wissen</button>
+      <button type="button" onclick="clearSignature()">Handtekening wissen</button>
       <input type="hidden" id="handtekening" name="handtekening">
 
-      <button type="submit">ðŸ“„ Factuur Downloaden</button>
+      <button type="submit">Factuur Downloaden</button>
     </form>
   </div>
 
@@ -317,7 +247,7 @@ def index():
       const div = document.createElement('div');
       div.className = 'dienst-block';
       div.innerHTML = `
-        <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>Ã—</button>
+        <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>×</button>
         <label>Dienst:</label>
         <input name='dienst_${dienstIndex}' required>
         <label>Aantal:</label>
