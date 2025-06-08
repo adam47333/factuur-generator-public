@@ -67,8 +67,7 @@ class FactuurPDF(FPDF):
         self.set_font('Helvetica', '', 11)
         subtotaal = 0
         totaal_btw = 0
-        for dienst_data in diensten:
-            dienst, aantal, prijs, btw_percentage = dienst_data
+        for dienst, aantal, prijs, btw_percentage in diensten:
             bedrag_excl = aantal * prijs
             btw_bedrag = bedrag_excl * (btw_percentage / 100)
             bedrag_incl = bedrag_excl + btw_bedrag
@@ -129,12 +128,11 @@ def index():
             diensten = []
             index = 0
             while f'dienst_{index}' in request.form:
-                dienst = request.form.get(f'dienst_{index}', '')
-                aantal = int(request.form.get(f'aantal_{index}', 0))
+                dienst = request.form.get(f'dienst_{index}')
+                aantal = int(request.form.get(f'aantal_{index}', 1))
                 prijs = float(request.form.get(f'prijs_{index}', 0))
-                btw_percentage = float(request.form.get(f'btw_{index}', 0))
-                if dienst.strip() != '':
-                    diensten.append((dienst, aantal, prijs, btw_percentage))
+                btw_percentage = float(request.form.get(f'btw_{index}', 21))
+                diensten.append((dienst, aantal, prijs, btw_percentage))
                 index += 1
 
             logo_file = request.files.get('logo')
@@ -171,30 +169,28 @@ def index():
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snelfactuurtje</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
     body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; }
-    .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1 { text-align: center; color: #007bff; }
+    .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    h1 { text-align: center; color: #007bff; margin-bottom: 30px; }
+    form { display: flex; flex-direction: column; gap: 20px; }
     .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-    .bedrijf { background-color: #e0f0ff; }
-    .klant { background-color: #ffe6cc; }
-    label { display: block; margin-top: 10px; font-weight: 500; }
-    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; }
-    .dienst-block { border: 1px solid #ccc; padding: 10px; border-radius: 10px; margin-top: 10px; position: relative; }
-    
-    .remove-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 16px;
-      line-height: 1;
-     position: absolute; top: 10px; right: 10px; background-color: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
-    button { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 30px; background-color: #007bff; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+    .bedrijf { background-color: #e6f2ff; }
+    .klant { background-color: #fff3e6; }
+    label { display: block; margin-top: 10px; font-weight: 500; font-size: 14px; color: #555; }
+    input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); font-size: 14px; }
+    .dienst-block { border: 1px solid #ccc; padding: 15px; border-radius: 12px; margin-top: 15px; background-color: #f9f9f9; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
+    .remove-btn { position: absolute; top: 10px; right: 10px; background-color: red; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
+    button { padding: 15px; border: none; border-radius: 30px; background-color: #007bff; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
     button:hover { background-color: #0056b3; }
-    canvas { border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; width: 100%; height: 150px; }
-    .button-group { display: flex; gap: 10px; margin-top: 10px; }
+    .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+    canvas { border: 2px solid #ccc; border-radius: 8px; margin-top: 10px; width: 100%; height: 200px; }
+    @media (min-width: 768px) {
+      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -204,53 +200,54 @@ def index():
       <label>Factuurnummer:</label>
       <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
 
-      <div class="block bedrijf">
-        <h2>Bedrijfsgegevens</h2>
-        <label>Bedrijfsnaam:</label>
-        <input name="bedrijfsnaam" required>
-        <label>Straat en huisnummer:</label>
-        <input name="straat" required>
-        <label>Postcode:</label>
-        <input name="postcode" required>
-        <label>Plaats:</label>
-        <input name="plaats" required>
-        <label>Land:</label>
-        <input name="land" required>
-        <label>KvK-nummer:</label>
-        <input name="kvk" required>
-        <label>BTW-nummer:</label>
-        <input name="btw" required>
-        <label>IBAN-nummer:</label>
-        <input name="iban" required>
+      <div class="form-grid">
+        <div class="block bedrijf">
+          <h2>Bedrijfsgegevens</h2>
+          <label>Bedrijfsnaam:</label>
+          <input name="bedrijfsnaam" required>
+          <label>Straat en huisnummer:</label>
+          <input name="straat" required>
+          <label>Postcode:</label>
+          <input name="postcode" required>
+          <label>Plaats:</label>
+          <input name="plaats" required>
+          <label>Land:</label>
+          <input name="land" required>
+          <label>KvK-nummer:</label>
+          <input name="kvk" required>
+          <label>BTW-nummer:</label>
+          <input name="btw" required>
+          <label>IBAN-nummer:</label>
+          <input name="iban" required>
+          <label>Upload jouw logo (optioneel):</label>
+          <input type="file" name="logo">
 
-        <label>Upload jouw logo (optioneel):</label>
-        <input type="file" name="logo">
-
-        <div class="button-group">
-          <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
-          <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
+          <div class="button-group">
+            <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
+            <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
+          </div>
         </div>
-      </div>
 
-      <div class="block klant">
-        <h2>Klantgegevens</h2>
-        <label>Klantnaam:</label>
-        <input name="klantnaam" required>
-        <label>Straat en huisnummer:</label>
-        <input name="klant_straat" required>
-        <label>Postcode:</label>
-        <input name="klant_postcode" required>
-        <label>Plaats:</label>
-        <input name="klant_plaats" required>
-        <label>Land:</label>
-        <input name="klant_land" required>
+        <div class="block klant">
+          <h2>Klantgegevens</h2>
+          <label>Klantnaam:</label>
+          <input name="klantnaam" required>
+          <label>Straat en huisnummer:</label>
+          <input name="klant_straat" required>
+          <label>Postcode:</label>
+          <input name="klant_postcode" required>
+          <label>Plaats:</label>
+          <input name="klant_plaats" required>
+          <label>Land:</label>
+          <input name="klant_land" required>
+        </div>
       </div>
 
       <div id="diensten"></div>
       <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button>
 
       <h2>Handtekening</h2>
-      <canvas id="signature-pad" width="600" height="200"></canvas>
+      <canvas id="signature-pad"></canvas>
       <button type="button" onclick="clearSignature()">Handtekening wissen</button>
       <input type="hidden" id="handtekening" name="handtekening">
 
