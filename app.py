@@ -59,7 +59,7 @@ class FactuurPDF(FPDF):
         for dienst, aantal, prijs, btw_percentage in diensten:
             bedrag_excl = aantal * prijs
             btw_bedrag = bedrag_excl * (btw_percentage / 100)
-            bedrag_incl = bedrag_excl + btw_btw_bedrag
+            bedrag_incl = bedrag_excl + btw_bedrag
             self.cell(80, 10, dienst, border=1)
             self.cell(20, 10, str(aantal), border=1, align='C')
             self.cell(30, 10, f"{prijs:.2f}", border=1, align='R')
