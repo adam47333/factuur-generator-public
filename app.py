@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import os
 from flask import Flask, request, send_file, render_template_string, abort
 from fpdf import FPDF
