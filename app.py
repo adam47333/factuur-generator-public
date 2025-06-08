@@ -273,7 +273,16 @@ def index():
       });
     }
 
+    
     function clearCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        localStorage.removeItem(field);
+        document.querySelector(`[name="${field}"]`).value = '';  // Veld leegmaken
+      });
+      alert('Bedrijfsgegevens gewist!');
+    }
+    
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
       fields.forEach(field => {
         localStorage.removeItem(field);
@@ -330,7 +339,16 @@ def index():
       });
     }
 
+    
     function clearCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        localStorage.removeItem(field);
+        document.querySelector(`[name="${field}"]`).value = '';  // Veld leegmaken
+      });
+      alert('Bedrijfsgegevens gewist!');
+    }
+    
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
       fields.forEach(field => {
         localStorage.removeItem(field);
@@ -404,7 +422,16 @@ def index():
       });
     }
 
+    
     function clearCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        localStorage.removeItem(field);
+        document.querySelector(`[name="${field}"]`).value = '';  // Veld leegmaken
+      });
+      alert('Bedrijfsgegevens gewist!');
+    }
+    
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
       fields.forEach(field => {
         localStorage.removeItem(field);
