@@ -18,102 +18,6 @@ class FactuurPDF(FPDF):
         super().__init__()
         self.logo_stream = logo_stream
 
-    def capitalize_text(self, text):
-        return ' '.join(word.capitalize() for word in text.split())
-
-    def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
-        if self.logo_stream:
-            try:
-                self.logo_stream.seek(0)
-                temp_logo_path = 'temp_logo.png'
-                with open(temp_logo_path, 'wb') as f:
-                    f.write(self.logo_stream.read())
-                self.image(temp_logo_path, x=10, y=8, w=40)
-                os.remove(temp_logo_path)
-            except Exception as e:
-                print(f"Fout bij laden van logo: {e}")
-        self.set_font('Helvetica', 'B', 14)
-        self.cell(0, 10, self.capitalize_text(bedrijfsnaam), ln=True, align='R')
-        self.set_font('Helvetica', '', 10)
-        self.cell(0, 6, straat, ln=True, align='R')
-        self.cell(0, 6, f"{postcode} {self.capitalize_text(plaats)}", ln=True, align='R')
-        self.cell(0, 6, self.capitalize_text(land), ln=True, align='R')
-        self.cell(0, 6, f"KvK: {kvk} | BTW: {btw}", ln=True, align='R')
-        self.cell(0, 6, f"IBAN: {iban}", ln=True, align='R')
-        self.ln(5)
-        self.set_line_width(0.5)
-        self.set_draw_color(200, 200, 200)
-        self.line(10, self.get_y(), 200, self.get_y())
-        self.ln(10)
-
-    def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam, handtekening_stream=None):
-        self.set_font('Helvetica', '', 10)
-        self.cell(0, 6, f"Factuurnummer: {factuurnummer}", ln=True)
-        self.cell(0, 6, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
-        self.ln(8)
-        self.set_font('Helvetica', 'B', 12)
-        self.cell(0, 8, "Factuur aan:", ln=True)
-        self.set_font('Helvetica', '', 10)
-        self.cell(0, 6, self.capitalize_text(klantnaam), ln=True)
-        self.cell(0, 6, klant_straat, ln=True)
-        self.cell(0, 6, f"{klant_postcode} {self.capitalize_text(klant_plaats)}", ln=True)
-        self.cell(0, 6, self.capitalize_text(klant_land), ln=True)
-        self.ln(8)
-
-        self.set_fill_color(240, 240, 240)
-        self.set_font('Helvetica', 'B', 10)
-        self.cell(70, 8, "Omschrijving", border=1, align='C', fill=True)
-        self.cell(20, 8, "Aantal", border=1, align='C', fill=True)
-        self.cell(30, 8, "Prijs", border=1, align='C', fill=True)
-        self.cell(20, 8, "BTW%", border=1, align='C', fill=True)
-        self.cell(30, 8, "Bedrag", border=1, align='C', fill=True)
-        self.ln()
-
-        self.set_font('Helvetica', '', 10)
-        subtotaal = 0
-        totaal_btw = 0
-        for dienst, aantal, prijs, btw_percentage in diensten:
-            bedrag_excl = aantal * prijs
-            btw_bedrag = bedrag_excl * (btw_percentage / 100)
-            bedrag_incl = bedrag_excl + btw_bedrag
-            self.cell(70, 8, dienst, border=1)
-            self.cell(20, 8, str(aantal), border=1, align='C')
-            self.cell(30, 8, f"{prijs:.2f}", border=1, align='R')
-            self.cell(20, 8, f"{btw_percentage}%", border=1, align='C')
-            self.cell(30, 8, f"{bedrag_incl:.2f}", border=1, align='R')
-            self.ln()
-            subtotaal += bedrag_excl
-            totaal_btw += btw_bedrag
-
-        totaal = subtotaal + totaal_btw
-        self.ln(5)
-        self.set_font('Helvetica', 'B', 11)
-        self.cell(140, 8, "Subtotaal (excl. BTW):", align='R')
-        self.cell(40, 8, f"{subtotaal:.2f} EUR", ln=True, align='R')
-        self.cell(140, 8, "Totaal BTW:", align='R')
-        self.cell(40, 8, f"{totaal_btw:.2f} EUR", ln=True, align='R')
-        self.cell(140, 8, "Totaal (incl. BTW):", align='R')
-        self.cell(40, 8, f"{totaal:.2f} EUR", ln=True, align='R')
-        self.ln(15)
-
-        self.set_font('Helvetica', '', 10)
-        self.cell(0, 6, "Met vriendelijke groet,", ln=True)
-        self.cell(0, 6, self.capitalize_text(bedrijfsnaam), ln=True)
-
-        if handtekening_stream:
-            if self.get_y() > 250:
-                self.add_page()
-            self.ln(15)
-            self.cell(0, 6, "Handtekening:", ln=True)
-            temp_handtekening_path = 'temp_handtekening.png'
-            with open(temp_handtekening_path, 'wb') as f:
-                f.write(handtekening_stream.getbuffer())
-            self.image(temp_handtekening_path, x=10, y=self.get_y(), w=60)
-            os.remove(temp_handtekening_path)
-    def __init__(self, logo_stream=None):
-        super().__init__()
-        self.logo_stream = logo_stream
-
     def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
@@ -265,22 +169,92 @@ def index():
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Snelfactuurtje</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; }
-    .container { max-width: 700px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h1 { text-align: center; color: #007bff; }
-    .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; }
-    .bedrijf { background-color: #e0f0ff; }
-    .klant { background-color: #ffe6cc; }
-    label { display: block; margin-top: 10px; font-weight: 500; }
-    input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; }
-    .dienst-block { border: 1px solid #ccc; padding: 10px; border-radius: 10px; margin-top: 10px; position: relative; }
-    .remove-btn { position: absolute; top: 10px; right: 10px; background-color: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
-    button { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 30px; background-color: #007bff; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
+    body {
+      background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+    h1 { text-align: center; color: #007bff; margin-bottom: 30px; }
+    form { display: flex; flex-direction: column; gap: 20px; }
+    .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; background-color: #f9f9f9; }
+    .bedrijf { background-color: #e6f2ff; }
+    .klant { background-color: #fff3e6; }
+    label { display: block; margin-top: 10px; font-weight: 500; font-size: 14px; color: #555; }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .dienst-block {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 15px;
+      background-color: #f9f9f9;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    button {
+      padding: 15px;
+      border: none;
+      border-radius: 30px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
     button:hover { background-color: #0056b3; }
-    canvas { border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; width: 100%; height: 150px; }
+    .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+    canvas {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin-top: 10px;
+      width: 100%;
+      height: 200px;
+    }
+    @media (min-width: 768px) {
+      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    }
   </style>
 </head>
 <body>
@@ -290,48 +264,54 @@ def index():
       <label>Factuurnummer:</label>
       <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
 
-      <div class="block bedrijf">
-        <h2>Bedrijfsgegevens</h2>
-        <label>Bedrijfsnaam:</label>
-        <input name="bedrijfsnaam" required>
-        <label>Straat en huisnummer:</label>
-        <input name="straat" required>
-        <label>Postcode:</label>
-        <input name="postcode" required>
-        <label>Plaats:</label>
-        <input name="plaats" required>
-        <label>Land:</label>
-        <input name="land" required>
-        <label>KvK-nummer:</label>
-        <input name="kvk" required>
-        <label>BTW-nummer:</label>
-        <input name="btw" required>
-        <label>IBAN-nummer:</label>
-        <input name="iban" required>
-      </div>
+      <div class="form-grid">
+        <div class="block bedrijf">
+          <h2>Bedrijfsgegevens</h2>
+          <label>Bedrijfsnaam:</label>
+          <input name="bedrijfsnaam" required>
+          <label>Straat en huisnummer:</label>
+          <input name="straat" required>
+          <label>Postcode:</label>
+          <input name="postcode" required>
+          <label>Plaats:</label>
+          <input name="plaats" required>
+          <label>Land:</label>
+          <input name="land" required>
+          <label>KvK-nummer:</label>
+          <input name="kvk" required>
+          <label>BTW-nummer:</label>
+          <input name="btw" required>
+          <label>IBAN-nummer:</label>
+          <input name="iban" required>
+          <label>Upload jouw logo (optioneel):</label>
+          <input type="file" name="logo">
 
-      <div class="block klant">
-        <h2>Klantgegevens</h2>
-        <label>Klantnaam:</label>
-        <input name="klantnaam" required>
-        <label>Straat en huisnummer:</label>
-        <input name="klant_straat" required>
-        <label>Postcode:</label>
-        <input name="klant_postcode" required>
-        <label>Plaats:</label>
-        <input name="klant_plaats" required>
-        <label>Land:</label>
-        <input name="klant_land" required>
+          <div class="button-group">
+            <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
+            <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
+          </div>
+        </div>
+
+        <div class="block klant">
+          <h2>Klantgegevens</h2>
+          <label>Klantnaam:</label>
+          <input name="klantnaam" required>
+          <label>Straat en huisnummer:</label>
+          <input name="klant_straat" required>
+          <label>Postcode:</label>
+          <input name="klant_postcode" required>
+          <label>Plaats:</label>
+          <input name="klant_plaats" required>
+          <label>Land:</label>
+          <input name="klant_land" required>
+        </div>
       </div>
 
       <div id="diensten"></div>
       <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button>
 
-      <label>Upload jouw logo (optioneel):</label>
-      <input type="file" name="logo">
-
       <h2>Handtekening</h2>
-      <canvas id="signature-pad" width="600" height="200"></canvas>
+      <canvas id="signature-pad"></canvas>
       <button type="button" onclick="clearSignature()">Handtekening wissen</button>
       <input type="hidden" id="handtekening" name="handtekening">
 
@@ -339,34 +319,7 @@ def index():
     </form>
   </div>
 
-  
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
-<script>
-    var canvas = document.getElementById('signature-pad');
-    function resizeCanvas() {
-        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-    var signaturePad = new SignaturePad(canvas);
-
-    function saveSignature() {
-      if (!signaturePad.isEmpty()) {
-        var dataURL = signaturePad.toDataURL();
-        document.getElementById('handtekening').value = dataURL;
-      }
-    }
-
-    function clearSignature() {
-      signaturePad.clear();
-    }
-
-    document.querySelector("form").addEventListener("submit", saveSignature);
-</script>
-
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
   <script>
     let dienstIndex = 0;
     function voegDienstToe() {
@@ -393,6 +346,14 @@ def index():
     }
 
     var canvas = document.getElementById('signature-pad');
+    function resizeCanvas() {
+        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
     var signaturePad = new SignaturePad(canvas);
 
     function saveSignature() {
@@ -406,7 +367,38 @@ def index():
       signaturePad.clear();
     }
 
+    function saveCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const value = document.querySelector(`[name="${field}"]`).value;
+        localStorage.setItem(field, value);
+      });
+      alert('Bedrijfsgegevens opgeslagen!');
+    }
+
+    function loadCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        const saved = localStorage.getItem(field);
+        if (saved) {
+          document.querySelector(`[name="${field}"]`).value = saved;
+        }
+      });
+    }
+
+    function clearCompanyInfo() {
+      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
+      fields.forEach(field => {
+        localStorage.removeItem(field);
+        document.querySelector(`[name="${field}"]`).value = '';
+      });
+      alert('Bedrijfsgegevens gewist!');
+    }
+
     document.querySelector("form").addEventListener("submit", saveSignature);
+    window.onload = function() {
+      loadCompanyInfo();
+    };
   </script>
 </body>
 </html>
