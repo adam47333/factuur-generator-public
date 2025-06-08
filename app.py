@@ -14,7 +14,7 @@ def add_header(response):
     return response
 
 
-class FactuurPDFProfessional(FPDF):
+class FactuurPDF(FPDF):
     def __init__(self, logo_stream=None):
         super().__init__()
         self.logo_stream = logo_stream
@@ -92,7 +92,7 @@ class FactuurPDFProfessional(FPDF):
             self.cell(35, 10, f"{bedrag_incl:.2f}", border=1, align='R')
             self.ln()
             subtotaal += bedrag_excl
-            totaal_btw += btw_bedrag
+            totaal_btw += btw_btw_bedrag
 
         totaal = subtotaal + totaal_btw
         self.ln(5)
@@ -119,8 +119,6 @@ class FactuurPDFProfessional(FPDF):
                 f.write(handtekening_stream.getbuffer())
             self.image(temp_handtekening_path, x=10, y=self.get_y(), w=60)
             os.remove(temp_handtekening_path)
-
-
 
     def __init__(self, logo_stream=None):
         super().__init__()
@@ -256,7 +254,7 @@ def index():
                 handtekening_bytes = base64.b64decode(encoded)
                 handtekening_stream = io.BytesIO(handtekening_bytes)
 
-            pdf = FactuurPDFProfessional(logo_stream)
+            pdf = FactuurPDF(logo_stream)
             pdf.add_page()
             pdf.header_custom(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
             pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam, handtekening_stream)
