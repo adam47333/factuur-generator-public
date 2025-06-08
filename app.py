@@ -173,21 +173,85 @@ def index():
   <title>Snelfactuurtje</title>
   <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
-    body { background-color: #f0f4f8; font-family: 'Poppins', sans-serif; margin: 0; padding: 20px; }
-    .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+    body {
+      background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
+      font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 20px;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .container {
+      width: 100%;
+      max-width: 900px;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
     h1 { text-align: center; color: #007bff; margin-bottom: 30px; }
     form { display: flex; flex-direction: column; gap: 20px; }
-    .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; }
+    .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; background-color: #f9f9f9; }
     .bedrijf { background-color: #e6f2ff; }
     .klant { background-color: #fff3e6; }
     label { display: block; margin-top: 10px; font-weight: 500; font-size: 14px; color: #555; }
-    input, select { width: 100%; padding: 12px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; box-shadow: inset 0 1px 3px rgba(0,0,0,0.1); font-size: 14px; }
-    .dienst-block { border: 1px solid #ccc; padding: 15px; border-radius: 12px; margin-top: 15px; background-color: #f9f9f9; position: relative; box-shadow: 0 2px 6px rgba(0,0,0,0.05); }
-    .remove-btn { position: absolute; top: 10px; right: 10px; background-color: red; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 16px; }
-    button { padding: 15px; border: none; border-radius: 30px; background-color: #007bff; color: white; font-size: 16px; font-weight: bold; cursor: pointer; transition: background 0.3s; }
+    input, select {
+      width: 100%;
+      padding: 12px;
+      margin-top: 5px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+    .dienst-block {
+      border: 1px solid #ccc;
+      padding: 15px;
+      border-radius: 12px;
+      margin-top: 15px;
+      background-color: #f9f9f9;
+      position: relative;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    }
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background-color: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+    button {
+      padding: 15px;
+      border: none;
+      border-radius: 30px;
+      background-color: #007bff;
+      color: white;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
     button:hover { background-color: #0056b3; }
     .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
-    canvas { border: 2px solid #ccc; border-radius: 8px; margin-top: 10px; width: 100%; height: 200px; }
+    canvas {
+      border: 2px solid #ccc;
+      border-radius: 8px;
+      margin-top: 10px;
+      width: 100%;
+      height: 200px;
+    }
     @media (min-width: 768px) {
       .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
     }
