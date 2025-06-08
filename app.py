@@ -181,7 +181,14 @@ def index():
     label { display: block; margin-top: 10px; font-weight: 500; }
     input, select { width: 100%; padding: 10px; margin-top: 5px; border-radius: 8px; border: 1px solid #ccc; }
     .dienst-block { border: 1px solid #ccc; padding: 10px; border-radius: 10px; margin-top: 10px; position: relative; }
-    .remove-btn { position: absolute; top: 10px; right: 10px; background-color: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
+    
+    .remove-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      line-height: 1;
+     position: absolute; top: 10px; right: 10px; background-color: red; color: white; border: none; border-radius: 50%; width: 25px; height: 25px; cursor: pointer; }
     button { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 30px; background-color: #007bff; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
     button:hover { background-color: #0056b3; }
     canvas { border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; width: 100%; height: 150px; }
