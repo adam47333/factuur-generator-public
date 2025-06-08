@@ -29,7 +29,7 @@ class FactuurPDF(FPDF):
         self.cell(0, 6, f"IBAN: {iban}", ln=True, align='L')
         self.ln(5)
 
-    def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam):
+    def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten):
         self.set_font('DejaVu', '', 10)
         self.set_fill_color(240, 240, 240)
         self.cell(95, 8, 'Factuurnummer:', border=1, fill=True)
@@ -82,61 +82,8 @@ class FactuurPDF(FPDF):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    if request.method == 'POST':
-        # Dummy endpoint: normally validate PayPal payment
-        return redirect(url_for('generate_invoice'))
-
     return render_template('index.html')
-
-@app.route('/generate-invoice', methods=['POST'])
-def generate_invoice():
-    global factuur_teller
-    bedrijfsnaam = request.form['bedrijfsnaam']
-    straat = request.form['straat']
-    postcode = request.form['postcode']
-    plaats = request.form['plaats']
-    land = request.form['land']
-    kvk = request.form['kvk']
-    btw = request.form['btw']
-    iban = request.form['iban']
-    klantnaam = request.form['klantnaam']
-    klant_straat = request.form['klant_straat']
-    klant_postcode = request.form['klant_postcode']
-    klant_plaats = request.form['klant_plaats']
-    klant_land = request.form['klant_land']
-    user_factuurnummer = request.form.get('factuurnummer', '').strip()
-    diensten = []
-
-    index = 0
-    while f'dienst_{index}' in request.form:
-        dienst = request.form.get(f'dienst_{index}')
-        aantal = int(request.form.get(f'aantal_{index}', 1))
-        prijs = float(request.form.get(f'prijs_{index}', 0))
-        btw_percentage = float(request.form.get(f'btw_{index}', 21))
-        diensten.append((dienst, aantal, prijs, btw_percentage))
-        index += 1
-
-    if user_factuurnummer:
-        factuurnummer = user_factuurnummer
-    else:
-        factuurnummer = f"SNLF-{datetime.today().year}-{factuur_teller:04d}"
-        factuur_teller += 1
-
-    pdf = FactuurPDF()
-    pdf.add_page()
-    pdf.header_custom(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
-    pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam)
-
-    pdf_output = io.BytesIO()
-    pdf.output(pdf_output)
-    pdf_output.seek(0)
-
-    return send_file(
-        pdf_output,
-        as_attachment=True,
-        download_name=f'{factuurnummer}.pdf',
-        mimetype='application/pdf'
-    )
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
+    
