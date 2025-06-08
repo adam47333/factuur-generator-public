@@ -185,6 +185,7 @@ def index():
     button { width: 100%; padding: 12px; margin-top: 20px; border: none; border-radius: 30px; background-color: #007bff; color: white; font-size: 18px; font-weight: bold; cursor: pointer; }
     button:hover { background-color: #0056b3; }
     canvas { border: 1px solid #ccc; border-radius: 8px; margin-top: 10px; width: 100%; height: 150px; }
+    .button-group { display: flex; gap: 10px; margin-top: 10px; }
   </style>
 </head>
 <body>
@@ -194,11 +195,8 @@ def index():
       <label>Factuurnummer:</label>
       <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
 
-      
-    <div class="block bedrijf">
-    <h2>Bedrijfsgegevens</h2>
-    
-        
+      <div class="block bedrijf">
+        <h2>Bedrijfsgegevens</h2>
         <label>Bedrijfsnaam:</label>
         <input name="bedrijfsnaam" required>
         <label>Straat en huisnummer:</label>
@@ -215,15 +213,17 @@ def index():
         <input name="btw" required>
         <label>IBAN-nummer:</label>
         <input name="iban" required>
-      
-    <div style="margin-top: 20px; display: flex; gap: 10px;">
-      <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
-      <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
-    </div>
-    </div>
-    
-    <div class="block klant">
-    
+
+        <label>Upload jouw logo (optioneel):</label>
+        <input type="file" name="logo">
+
+        <div class="button-group">
+          <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
+          <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
+        </div>
+      </div>
+
+      <div class="block klant">
         <h2>Klantgegevens</h2>
         <label>Klantnaam:</label>
         <input name="klantnaam" required>
@@ -240,9 +240,6 @@ def index():
       <div id="diensten"></div>
       <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button>
 
-      <label>Upload jouw logo (optioneel):</label>
-      <input type="file" name="logo">
-
       <h2>Handtekening</h2>
       <canvas id="signature-pad" width="600" height="200"></canvas>
       <button type="button" onclick="clearSignature()">Handtekening wissen</button>
@@ -252,116 +249,7 @@ def index():
     </form>
   </div>
 
-  
-<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js">
-    function saveCompanyInfo() {
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        const value = document.querySelector(`[name="${field}"]`).value;
-        localStorage.setItem(field, value);
-      });
-      alert('Bedrijfsgegevens opgeslagen!');
-    }
-
-    function loadCompanyInfo() {
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        const saved = localStorage.getItem(field);
-        if (saved) {
-          document.querySelector(`[name="${field}"]`).value = saved;
-        }
-      });
-    }
-
-    
-    function clearCompanyInfo() {
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        localStorage.removeItem(field);
-        document.querySelector(`[name="${field}"]`).value = '';  // Veld leegmaken
-      });
-      alert('Bedrijfsgegevens gewist!');
-    }
-    
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        localStorage.removeItem(field);
-      });
-      alert('Bedrijfsgegevens gewist!');
-    }
-
-    window.onload = function() {
-      loadCompanyInfo();
-    };
-    </script>
-    
-<script>
-    var canvas = document.getElementById('signature-pad');
-    function resizeCanvas() {
-        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
-    }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-    var signaturePad = new SignaturePad(canvas);
-
-    function saveSignature() {
-      if (!signaturePad.isEmpty()) {
-        var dataURL = signaturePad.toDataURL();
-        document.getElementById('handtekening').value = dataURL;
-      }
-    }
-
-    function clearSignature() {
-      signaturePad.clear();
-    }
-
-    document.querySelector("form").addEventListener("submit", saveSignature);
-
-    function saveCompanyInfo() {
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        const value = document.querySelector(`[name="${field}"]`).value;
-        localStorage.setItem(field, value);
-      });
-      alert('Bedrijfsgegevens opgeslagen!');
-    }
-
-    function loadCompanyInfo() {
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        const saved = localStorage.getItem(field);
-        if (saved) {
-          document.querySelector(`[name="${field}"]`).value = saved;
-        }
-      });
-    }
-
-    
-    function clearCompanyInfo() {
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        localStorage.removeItem(field);
-        document.querySelector(`[name="${field}"]`).value = '';  // Veld leegmaken
-      });
-      alert('Bedrijfsgegevens gewist!');
-    }
-    
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        localStorage.removeItem(field);
-      });
-      alert('Bedrijfsgegevens gewist!');
-    }
-
-    window.onload = function() {
-      loadCompanyInfo();
-    };
-    </script>
-    
-
+  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
   <script>
     let dienstIndex = 0;
     function voegDienstToe() {
@@ -388,6 +276,14 @@ def index():
     }
 
     var canvas = document.getElementById('signature-pad');
+    function resizeCanvas() {
+        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
     var signaturePad = new SignaturePad(canvas);
 
     function saveSignature() {
@@ -401,8 +297,6 @@ def index():
       signaturePad.clear();
     }
 
-    document.querySelector("form").addEventListener("submit", saveSignature);
-  
     function saveCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
       fields.forEach(field => {
@@ -422,28 +316,20 @@ def index():
       });
     }
 
-    
     function clearCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
       fields.forEach(field => {
         localStorage.removeItem(field);
-        document.querySelector(`[name="${field}"]`).value = '';  // Veld leegmaken
-      });
-      alert('Bedrijfsgegevens gewist!');
-    }
-    
-      const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
-        localStorage.removeItem(field);
+        document.querySelector(`[name="${field}"]`).value = '';
       });
       alert('Bedrijfsgegevens gewist!');
     }
 
+    document.querySelector("form").addEventListener("submit", saveSignature);
     window.onload = function() {
       loadCompanyInfo();
     };
-    </script>
-    
+  </script>
 </body>
 </html>
 '''
