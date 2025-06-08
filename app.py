@@ -6,8 +6,6 @@ from datetime import datetime
 
 app = Flask(__name__)
 
-factuur_teller = 1
-
 class FactuurPDF(FPDF):
     def __init__(self, logo_stream=None):
         super().__init__()
@@ -41,35 +39,41 @@ class FactuurPDF(FPDF):
         self.cell(0, 10, klant_land, ln=True)
         self.ln(10)
 
+        # Tabel kop
+        self.set_fill_color(200, 220, 255)
         self.set_font('Helvetica', 'B', 12)
-        self.cell(60, 10, "Omschrijving", border=1, align='C')
-        self.cell(20, 10, "Aantal", border=1, align='C')
-        self.cell(30, 10, "Prijs", border=1, align='C')
-        self.cell(20, 10, "BTW%", border=1, align='C')
-        self.cell(30, 10, "Bedrag", border=1, align='C', ln=True)
+        self.cell(70, 10, "Omschrijving", border=1, align='C', fill=True)
+        self.cell(20, 10, "Aantal", border=1, align='C', fill=True)
+        self.cell(30, 10, "Prijs", border=1, align='C', fill=True)
+        self.cell(20, 10, "BTW%", border=1, align='C', fill=True)
+        self.cell(30, 10, "Bedrag", border=1, align='C', fill=True)
+        self.ln()
 
+        # Tabel inhoud
         self.set_font('Helvetica', '', 12)
         subtotaal = 0
         totaal_btw = 0
         for dienst, aantal, prijs, btw_percentage in diensten:
             bedrag_excl = aantal * prijs
             btw_bedrag = bedrag_excl * (btw_percentage / 100)
-            self.cell(60, 10, dienst, border=1)
+            bedrag_incl = bedrag_excl + btw_bedrag
+            self.cell(70, 10, dienst, border=1)
             self.cell(20, 10, str(aantal), border=1, align='C')
-            self.cell(30, 10, f"{prijs:.2f}", border=1, align='C')
+            self.cell(30, 10, f"{prijs:.2f}", border=1, align='R')
             self.cell(20, 10, f"{btw_percentage}%", border=1, align='C')
-            self.cell(30, 10, f"{(bedrag_excl + btw_bedrag):.2f}", border=1, align='C', ln=True)
+            self.cell(30, 10, f"{bedrag_incl:.2f}", border=1, align='R')
+            self.ln()
             subtotaal += bedrag_excl
             totaal_btw += btw_bedrag
 
         totaal = subtotaal + totaal_btw
         self.ln(5)
-        self.cell(130, 10, "Subtotaal (excl. BTW):", align='R')
-        self.cell(30, 10, f"{subtotaal:.2f} EUR", ln=True, align='R')
-        self.cell(130, 10, "Totaal BTW:", align='R')
-        self.cell(30, 10, f"{totaal_btw:.2f} EUR", ln=True, align='R')
-        self.cell(130, 10, "Totaal (incl. BTW):", align='R')
         self.set_font('Helvetica', 'B', 12)
+        self.cell(140, 10, "Subtotaal (excl. BTW):", align='R')
+        self.cell(30, 10, f"{subtotaal:.2f} EUR", ln=True, align='R')
+        self.cell(140, 10, "Totaal BTW:", align='R')
+        self.cell(30, 10, f"{totaal_btw:.2f} EUR", ln=True, align='R')
+        self.cell(140, 10, "Totaal (incl. BTW):", align='R')
         self.cell(30, 10, f"{totaal:.2f} EUR", ln=True, align='R')
         self.ln(20)
         self.set_font('Helvetica', '', 12)
@@ -78,10 +82,9 @@ class FactuurPDF(FPDF):
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
-    global factuur_teller
-
     if request.method == 'POST':
         try:
+            factuurnummer = request.form['factuurnummer']
             bedrijfsnaam = request.form['bedrijfsnaam']
             straat = request.form['straat']
             postcode = request.form['postcode']
@@ -110,9 +113,6 @@ def index():
                 diensten.append((dienst, aantal, prijs, btw_percentage))
                 index += 1
 
-            factuurnummer = f"SNLF-{datetime.today().year}-{factuur_teller:04d}"
-            factuur_teller += 1
-
             logo_file = request.files.get('logo')
             logo_stream = None
             if logo_file and logo_file.filename:
@@ -137,11 +137,11 @@ def index():
 
     html_content = """
 <!doctype html>
-<html lang="nl">
+<html lang='nl'>
 <head>
-  <meta charset="utf-8">
+  <meta charset='utf-8'>
   <title>Snelfactuurtje</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href='https://fonts.googleapis.com/css2?family=Poppins&display=swap' rel='stylesheet'>
   <style>
     body {
       background-color: #f0f4f8;
@@ -168,9 +168,6 @@ def index():
       margin-top: 20px;
       margin-bottom: 10px;
       color: #333;
-      display: flex;
-      align-items: center;
-      gap: 10px;
     }
     .block {
       padding: 20px;
@@ -197,7 +194,7 @@ def index():
       border-radius: 8px;
       box-sizing: border-box;
     }
-    .btn {
+    button {
       width: 100%;
       background-color: #007bff;
       color: white;
@@ -208,17 +205,9 @@ def index():
       cursor: pointer;
       font-size: 18px;
       font-weight: 600;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-      text-decoration: none;
     }
-    .btn:hover {
+    button:hover {
       background-color: #0056b3;
-    }
-    .dienst-block {
-      margin-bottom: 20px;
     }
   </style>
 </head>
@@ -226,6 +215,8 @@ def index():
   <div class="container">
     <h1>Snelfactuurtje 🚀</h1>
     <form method="POST" enctype="multipart/form-data">
+      <label>Factuurnummer:</label>
+      <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
       <div class="block bedrijf">
         <h2>🏢 Bedrijfsgegevens</h2>
         <label>Bedrijfsnaam:</label>
@@ -259,10 +250,10 @@ def index():
         <input name="klant_land" required>
       </div>
       <div id="diensten"></div>
-      <button type="button" class="btn" onclick="voegDienstToe()">➕ Dienst toevoegen</button>
+      <button type="button" onclick="voegDienstToe()">➕ Dienst toevoegen</button>
       <label>Upload jouw logo (optioneel):</label>
       <input type="file" name="logo">
-      <button type="submit" class="btn">📄 Factuur Downloaden</button>
+      <button type="submit">📄 Factuur Downloaden</button>
     </form>
   </div>
   <script>
@@ -270,7 +261,7 @@ def index():
     function voegDienstToe() {
       const container = document.getElementById('diensten');
       const html = `
-        <div class="dienst-block">
+        <div>
           <label>Dienst:</label>
           <input name="dienst_${dienstIndex}" required>
           <label>Aantal:</label>
@@ -288,68 +279,10 @@ def index():
       container.insertAdjacentHTML('beforeend', html);
       dienstIndex++;
     }
-    window.onload = voegDienstToe;
   </script>
 </body>
 </html>
-
-<html lang='nl'>
-<head>
-<meta charset='utf-8'>
-<title>Snelfactuurtje</title>
-</head>
-<body>
-<h1>Factuur Generator</h1>
-<form method="POST" enctype="multipart/form-data">
-  <h2>Bedrijfsgegevens</h2>
-  <input name="bedrijfsnaam" placeholder="Bedrijfsnaam" required><br>
-  <input name="straat" placeholder="Straat" required><br>
-  <input name="postcode" placeholder="Postcode" required><br>
-  <input name="plaats" placeholder="Plaats" required><br>
-  <input name="land" placeholder="Land" required><br>
-  <input name="kvk" placeholder="KvK" required><br>
-  <input name="btw" placeholder="BTW" required><br>
-  <input name="iban" placeholder="IBAN" required><br>
-
-  <h2>Klantgegevens</h2>
-  <input name="klantnaam" placeholder="Klantnaam" required><br>
-  <input name="klant_straat" placeholder="Straat" required><br>
-  <input name="klant_postcode" placeholder="Postcode" required><br>
-  <input name="klant_plaats" placeholder="Plaats" required><br>
-  <input name="klant_land" placeholder="Land" required><br>
-
-  <h2>Diensten</h2>
-  <div id="diensten"></div>
-  <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button><br><br>
-
-  <input type="file" name="logo"><br><br>
-
-  <button type="submit">Download Factuur</button>
-</form>
-
-<script>
-let dienstIndex = 0;
-function voegDienstToe() {
-  const container = document.getElementById('diensten');
-  const html = `
-    <div>
-      <input name="dienst_${dienstIndex}" placeholder="Dienst" required>
-      <input name="aantal_${dienstIndex}" placeholder="Aantal" type="number" required>
-      <input name="prijs_${dienstIndex}" placeholder="Prijs" type="number" step="0.01" required>
-      <select name="btw_${dienstIndex}">
-        <option value="0">0%</option>
-        <option value="9">9%</option>
-        <option value="21" selected>21%</option>
-      </select>
-    </div>
-  `;
-  container.insertAdjacentHTML('beforeend', html);
-  dienstIndex++;
-}
-window.onload = voegDienstToe;
-</script>
-</body>
-</html>"""
+"""
     return render_template_string(html_content)
 
 if __name__ == '__main__':
