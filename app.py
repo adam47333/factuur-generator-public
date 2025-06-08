@@ -150,6 +150,8 @@ def index():
     body {
       background-color: #f0f4f8;
       font-family: 'Poppins', sans-serif;
+      margin: 0;
+      padding: 0;
     }
     .container {
       max-width: 700px;
@@ -162,10 +164,13 @@ def index():
     h1 {
       text-align: center;
       color: #007bff;
+      margin-bottom: 20px;
     }
     h2 {
       margin-top: 20px;
+      margin-bottom: 10px;
       color: #333;
+      font-size: 18px;
     }
     .block {
       padding: 20px;
@@ -230,98 +235,80 @@ def index():
   </style>
 </head>
 <body>
-<div class='container'>
-  <h1>Snelfactuurtje 🚀</h1>
-  <form method='POST' enctype='multipart/form-data'>
-    <div class='block bedrijf'>
-      <h2>🏢 Bedrijfsgegevens</h2>
+  <div class='container'>
+    <h1>Snelfactuurtje 🚀</h1>
+    <form method='POST' enctype='multipart/form-data'>
       <label>Factuurnummer:</label>
       <input name='factuurnummer' placeholder='Bijv. FACT-2025-001' required>
-      <label>Bedrijfsnaam:</label>
-      <input name='bedrijfsnaam' required>
-      <label>Straat en huisnummer:</label>
-      <input name='straat' required>
-      <label>Postcode:</label>
-      <input name='postcode' required>
-      <label>Plaats:</label>
-      <input name='plaats' required>
-      <label>Land:</label>
-      <input name='land' required>
-      <label>KvK-nummer:</label>
-      <input name='kvk' required>
-      <label>BTW-nummer:</label>
-      <input name='btw' required>
-      <label>IBAN-nummer:</label>
-      <input name='iban' required>
-    </div>
 
-    <div class="block bedrijf">
-      <h2>🏢 Bedrijfsgegevens</h2>
-      <label>Bedrijfsnaam:</label>
-      <input name='bedrijfsnaam' required>
-      <label>Straat en huisnummer:</label>
-      <input name='straat' required>
-      <label>Postcode:</label>
-      <input name='postcode' required>
-      <label>Plaats:</label>
-      <input name='plaats' required>
-      <label>Land:</label>
-      <input name='land' required>
-      <label>KvK-nummer:</label>
-      <input name='kvk' required>
-      <label>BTW-nummer:</label>
-      <input name='btw' required>
-      <label>IBAN-nummer:</label>
-      <input name='iban' required>
-    </div>
+      <div class='block bedrijf'>
+        <h2>🏢 Bedrijfsgegevens</h2>
+        <label>Bedrijfsnaam:</label>
+        <input name='bedrijfsnaam' required>
+        <label>Straat en huisnummer:</label>
+        <input name='straat' required>
+        <label>Postcode:</label>
+        <input name='postcode' required>
+        <label>Plaats:</label>
+        <input name='plaats' required>
+        <label>Land:</label>
+        <input name='land' required>
+        <label>KvK-nummer:</label>
+        <input name='kvk' required>
+        <label>BTW-nummer:</label>
+        <input name='btw' required>
+        <label>IBAN-nummer:</label>
+        <input name='iban' required>
+      </div>
 
-    <div class="block klant">
-      <h2>🧑‍💼 Klantgegevens</h2>
-      <label>Klantnaam:</label>
-      <input name='klantnaam' required>
-      <label>Straat en huisnummer:</label>
-      <input name='klant_straat' required>
-      <label>Postcode:</label>
-      <input name='klant_postcode' required>
-      <label>Plaats:</label>
-      <input name='klant_plaats' required>
-      <label>Land:</label>
-      <input name='klant_land' required>
-    </div>
+      <div class='block klant'>
+        <h2>🧑‍💼 Klantgegevens</h2>
+        <label>Klantnaam:</label>
+        <input name='klantnaam' required>
+        <label>Straat en huisnummer:</label>
+        <input name='klant_straat' required>
+        <label>Postcode:</label>
+        <input name='klant_postcode' required>
+        <label>Plaats:</label>
+        <input name='klant_plaats' required>
+        <label>Land:</label>
+        <input name='klant_land' required>
+      </div>
 
-    <div id='diensten'></div>
-    <button type='button' onclick='voegDienstToe()'>➕ Dienst toevoegen</button>
+      <div id='diensten'></div>
+      <button type='button' onclick='voegDienstToe()'>➕ Dienst toevoegen</button>
 
-    <label>Upload jouw logo (optioneel):</label>
-    <input type='file' name='logo'>
-    <button type='submit'>📄 Factuur Downloaden</button>
-  </form>
-</div>
-<script>
-  let dienstIndex = 0;
-  function voegDienstToe() {
-    const container = document.getElementById('diensten');
-    const div = document.createElement('div');
-    div.className = 'dienst-block';
-    div.innerHTML = `
-      <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>×</button>
-      <label>Dienst:</label>
-      <input name='dienst_${dienstIndex}' required>
-      <label>Aantal:</label>
-      <input name='aantal_${dienstIndex}' type='number' required>
-      <label>Prijs per stuk:</label>
-      <input name='prijs_${dienstIndex}' type='number' step='0.01' required>
-      <label>BTW-percentage:</label>
-      <select name='btw_${dienstIndex}'>
-        <option value='0'>0%</option>
-        <option value='9'>9%</option>
-        <option value='21' selected>21%</option>
-      </select>
-    `;
-    container.appendChild(div);
-    dienstIndex++;
-  }
-</script>
+      <label>Upload jouw logo (optioneel):</label>
+      <input type='file' name='logo'>
+      <button type='submit'>📄 Factuur Downloaden</button>
+    </form>
+  </div>
+
+  <script>
+    let dienstIndex = 0;
+    function voegDienstToe() {
+      const container = document.getElementById('diensten');
+      const div = document.createElement('div');
+      div.className = 'dienst-block';
+      div.innerHTML = `
+        <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>×</button>
+        <label>Dienst:</label>
+        <input name='dienst_${dienstIndex}' required>
+        <label>Aantal:</label>
+        <input name='aantal_${dienstIndex}' type='number' required>
+        <label>Prijs per stuk:</label>
+        <input name='prijs_${dienstIndex}' type='number' step='0.01' required>
+        <label>BTW-percentage:</label>
+        <select name='btw_${dienstIndex}'>
+          <option value='0'>0%</option>
+          <option value='9'>9%</option>
+          <option value='21' selected>21%</option>
+        </select>
+      `;
+      container.appendChild(div);
+      dienstIndex++;
+    }
+  </script>
 </body>
 </html>
 
