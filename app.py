@@ -168,6 +168,9 @@ def index():
       margin-top: 20px;
       margin-bottom: 10px;
       color: #333;
+      display: flex;
+      align-items: center;
+      gap: 10px;
     }
     .block {
       padding: 20px;
@@ -194,7 +197,7 @@ def index():
       border-radius: 8px;
       box-sizing: border-box;
     }
-    button {
+    .btn {
       width: 100%;
       background-color: #007bff;
       color: white;
@@ -205,18 +208,26 @@ def index():
       cursor: pointer;
       font-size: 18px;
       font-weight: 600;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
     }
-    button:hover {
+    .btn:hover {
       background-color: #0056b3;
+    }
+    .dienst-block {
+      margin-bottom: 20px;
     }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Snelfactuurtje</h1>
+    <h1>Snelfactuurtje 🚀</h1>
     <form method="POST" enctype="multipart/form-data">
       <div class="block bedrijf">
-        <h2>Bedrijfsgegevens</h2>
+        <h2>🏢 Bedrijfsgegevens</h2>
         <label>Bedrijfsnaam:</label>
         <input name="bedrijfsnaam" required>
         <label>Straat en huisnummer:</label>
@@ -235,7 +246,7 @@ def index():
         <input name="iban" required>
       </div>
       <div class="block klant">
-        <h2>Klantgegevens</h2>
+        <h2>🧑‍💼 Klantgegevens</h2>
         <label>Klantnaam:</label>
         <input name="klantnaam" required>
         <label>Straat en huisnummer:</label>
@@ -248,10 +259,10 @@ def index():
         <input name="klant_land" required>
       </div>
       <div id="diensten"></div>
-      <button type="button" onclick="voegDienstToe()">Dienst toevoegen</button>
+      <button type="button" class="btn" onclick="voegDienstToe()">➕ Dienst toevoegen</button>
       <label>Upload jouw logo (optioneel):</label>
       <input type="file" name="logo">
-      <button type="submit">Download Factuur</button>
+      <button type="submit" class="btn">📄 Factuur Downloaden</button>
     </form>
   </div>
   <script>
@@ -259,7 +270,7 @@ def index():
     function voegDienstToe() {
       const container = document.getElementById('diensten');
       const html = `
-        <div>
+        <div class="dienst-block">
           <label>Dienst:</label>
           <input name="dienst_${dienstIndex}" required>
           <label>Aantal:</label>
