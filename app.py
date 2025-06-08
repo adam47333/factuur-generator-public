@@ -21,9 +21,10 @@ class FactuurPDF(FPDF):
     def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
+                self.logo_stream.seek(0)
                 temp_logo_path = 'temp_logo.png'
                 with open(temp_logo_path, 'wb') as f:
-                    f.write(self.logo_stream.getbuffer())
+                    f.write(self.logo_stream.read())
                 self.image(temp_logo_path, x=10, y=8, w=40)
                 os.remove(temp_logo_path)
             except Exception as e:
@@ -138,6 +139,7 @@ def index():
             logo_stream = None
             if logo_file and logo_file.filename:
                 logo_stream = io.BytesIO(logo_file.read())
+                logo_stream.seek(0)
 
             handtekening_data = request.form.get('handtekening')
             handtekening_stream = None
