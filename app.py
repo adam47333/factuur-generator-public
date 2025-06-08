@@ -141,36 +141,29 @@ def index():
 
     html_content = """
 <!doctype html>
-<html lang='nl'>
+<html lang="nl">
 <head>
-  <meta charset='utf-8'>
+  <meta charset="utf-8">
   <title>Snelfactuurtje</title>
-  <link href='https://fonts.googleapis.com/css2?family=Poppins&display=swap' rel='stylesheet'>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
   <style>
     body {
       background-color: #f0f4f8;
       font-family: 'Poppins', sans-serif;
       margin: 0;
-      padding: 0;
+      padding: 20px;
     }
     .container {
       max-width: 700px;
-      margin: 50px auto;
+      margin: auto;
       background: white;
       padding: 30px;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
       border-radius: 15px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
     h1 {
       text-align: center;
       color: #007bff;
-      margin-bottom: 20px;
-    }
-    h2 {
-      margin-top: 20px;
-      margin-bottom: 10px;
-      color: #333;
-      font-size: 18px;
     }
     .block {
       padding: 20px;
@@ -186,48 +179,45 @@ def index():
     label {
       display: block;
       margin-top: 10px;
-      color: #333;
       font-weight: 500;
     }
     input, select {
       width: 100%;
       padding: 10px;
       margin-top: 5px;
-      border: 1px solid #ccc;
       border-radius: 8px;
-      box-sizing: border-box;
+      border: 1px solid #ccc;
     }
     .dienst-block {
       border: 1px solid #ccc;
       padding: 10px;
-      margin-top: 15px;
       border-radius: 10px;
+      margin-top: 10px;
       position: relative;
     }
     .remove-btn {
       position: absolute;
       top: 10px;
       right: 10px;
-      background: red;
+      background-color: red;
       color: white;
       border: none;
       border-radius: 50%;
       width: 25px;
       height: 25px;
       cursor: pointer;
-      font-weight: bold;
     }
     button {
       width: 100%;
-      background-color: #007bff;
-      color: white;
-      border: none;
       padding: 12px;
       margin-top: 20px;
+      border: none;
       border-radius: 30px;
-      cursor: pointer;
+      background-color: #007bff;
+      color: white;
       font-size: 18px;
-      font-weight: 600;
+      font-weight: bold;
+      cursor: pointer;
     }
     button:hover {
       background-color: #0056b3;
@@ -235,52 +225,52 @@ def index():
   </style>
 </head>
 <body>
-  <div class='container'>
+  <div class="container">
     <h1>Snelfactuurtje 🚀</h1>
-    <form method='POST' enctype='multipart/form-data'>
+    <form method="POST" enctype="multipart/form-data">
       <label>Factuurnummer:</label>
-      <input name='factuurnummer' placeholder='Bijv. FACT-2025-001' required>
+      <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
 
-      <div class='block bedrijf'>
+      <div class="block bedrijf">
         <h2>🏢 Bedrijfsgegevens</h2>
         <label>Bedrijfsnaam:</label>
-        <input name='bedrijfsnaam' required>
+        <input name="bedrijfsnaam" required>
         <label>Straat en huisnummer:</label>
-        <input name='straat' required>
+        <input name="straat" required>
         <label>Postcode:</label>
-        <input name='postcode' required>
+        <input name="postcode" required>
         <label>Plaats:</label>
-        <input name='plaats' required>
+        <input name="plaats" required>
         <label>Land:</label>
-        <input name='land' required>
+        <input name="land" required>
         <label>KvK-nummer:</label>
-        <input name='kvk' required>
+        <input name="kvk" required>
         <label>BTW-nummer:</label>
-        <input name='btw' required>
+        <input name="btw" required>
         <label>IBAN-nummer:</label>
-        <input name='iban' required>
+        <input name="iban" required>
       </div>
 
-      <div class='block klant'>
+      <div class="block klant">
         <h2>🧑‍💼 Klantgegevens</h2>
         <label>Klantnaam:</label>
-        <input name='klantnaam' required>
+        <input name="klantnaam" required>
         <label>Straat en huisnummer:</label>
-        <input name='klant_straat' required>
+        <input name="klant_straat" required>
         <label>Postcode:</label>
-        <input name='klant_postcode' required>
+        <input name="klant_postcode" required>
         <label>Plaats:</label>
-        <input name='klant_plaats' required>
+        <input name="klant_plaats" required>
         <label>Land:</label>
-        <input name='klant_land' required>
+        <input name="klant_land" required>
       </div>
 
-      <div id='diensten'></div>
-      <button type='button' onclick='voegDienstToe()'>➕ Dienst toevoegen</button>
+      <div id="diensten"></div>
+      <button type="button" onclick="voegDienstToe()">➕ Dienst toevoegen</button>
 
       <label>Upload jouw logo (optioneel):</label>
-      <input type='file' name='logo'>
-      <button type='submit'>📄 Factuur Downloaden</button>
+      <input type="file" name="logo">
+      <button type="submit">📄 Factuur Downloaden</button>
     </form>
   </div>
 
