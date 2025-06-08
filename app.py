@@ -194,7 +194,10 @@ def index():
       <label>Factuurnummer:</label>
       <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
 
-      <div class="block bedrijf">
+      
+    <div class="block bedrijf">
+    <h2>Bedrijfsgegevens</h2>
+    
         <h2>Bedrijfsgegevens</h2>
         <label>Bedrijfsnaam:</label>
         <input name="bedrijfsnaam" required>
@@ -212,9 +215,15 @@ def index():
         <input name="btw" required>
         <label>IBAN-nummer:</label>
         <input name="iban" required>
-      </div>
-
-      <div class="block klant">
+      
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+      <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
+      <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
+    </div>
+    </div>
+    
+    <div class="block klant">
+    
         <h2>Klantgegevens</h2>
         <label>Klantnaam:</label>
         <input name="klantnaam" required>
@@ -240,11 +249,7 @@ def index():
       <input type="hidden" id="handtekening" name="handtekening">
 
       <button type="submit">Factuur Downloaden</button>
-    
-    <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
-    <button type="button" onclick="clearCompanyInfo()">Bedrijfsgegevens wissen</button>
     </form>
-    
   </div>
 
   
