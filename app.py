@@ -67,7 +67,8 @@ class FactuurPDF(FPDF):
         self.set_font('Helvetica', '', 11)
         subtotaal = 0
         totaal_btw = 0
-        for dienst, aantal, prijs, btw_percentage in diensten:
+        for dienst_data in diensten:
+            dienst, aantal, prijs, btw_percentage = dienst_data
             bedrag_excl = aantal * prijs
             btw_bedrag = bedrag_excl * (btw_percentage / 100)
             bedrag_incl = bedrag_excl + btw_bedrag
@@ -128,11 +129,12 @@ def index():
             diensten = []
             index = 0
             while f'dienst_{index}' in request.form:
-                dienst = request.form.get(f'dienst_{index}')
-                aantal = int(request.form.get(f'aantal_{index}', 1))
+                dienst = request.form.get(f'dienst_{index}', '')
+                aantal = int(request.form.get(f'aantal_{index}', 0))
                 prijs = float(request.form.get(f'prijs_{index}', 0))
-                btw_percentage = float(request.form.get(f'btw_{index}', 21))
-                diensten.append((dienst, aantal, prijs, btw_percentage))
+                btw_percentage = float(request.form.get(f'btw_{index}', 0))
+                if dienst.strip() != '':
+                    diensten.append((dienst, aantal, prijs, btw_percentage))
                 index += 1
 
             logo_file = request.files.get('logo')
