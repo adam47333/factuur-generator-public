@@ -94,12 +94,14 @@ class FactuurPDF(FPDF):
         self.cell(0, 8, bedrijfsnaam, ln=True)
 
         if handtekening_stream:
+            if self.get_y() > 250:
+                self.add_page()
+            self.ln(20)
+            self.cell(0, 8, "Handtekening:", ln=True)
             temp_handtekening_path = 'temp_handtekening.png'
             with open(temp_handtekening_path, 'wb') as f:
                 f.write(handtekening_stream.getbuffer())
-            self.ln(20)
-            self.cell(0, 8, "Handtekening:", ln=True)
-            self.image(temp_handtekening_path, x=10, y=self.get_y(), w=60)
+            self.image(temp_handtekening_path, x=10, y=self.get_y(), w=80)
             os.remove(temp_handtekening_path)
 
 @app.route('/', methods=['GET', 'POST'])
@@ -231,7 +233,7 @@ def index():
       <input type="file" name="logo">
 
       <h2>Handtekening</h2>
-      <canvas id="signature-pad"></canvas>
+      <canvas id="signature-pad" width="600" height="200"></canvas>
       <button type="button" onclick="clearSignature()">Handtekening wissen</button>
       <input type="hidden" id="handtekening" name="handtekening">
 
@@ -239,7 +241,34 @@ def index():
     </form>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+  
+<script src="https://cdn.jsdelivr.net/npm/signature_pad@4.0.0/dist/signature_pad.umd.min.js"></script>
+<script>
+    var canvas = document.getElementById('signature-pad');
+    function resizeCanvas() {
+        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
+        canvas.width = canvas.offsetWidth * ratio;
+        canvas.height = canvas.offsetHeight * ratio;
+        canvas.getContext("2d").scale(ratio, ratio);
+    }
+    window.addEventListener("resize", resizeCanvas);
+    resizeCanvas();
+    var signaturePad = new SignaturePad(canvas);
+
+    function saveSignature() {
+      if (!signaturePad.isEmpty()) {
+        var dataURL = signaturePad.toDataURL();
+        document.getElementById('handtekening').value = dataURL;
+      }
+    }
+
+    function clearSignature() {
+      signaturePad.clear();
+    }
+
+    document.querySelector("form").addEventListener("submit", saveSignature);
+</script>
+
   <script>
     let dienstIndex = 0;
     function voegDienstToe() {
