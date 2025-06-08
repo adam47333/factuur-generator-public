@@ -14,35 +14,39 @@ class FactuurPDF(FPDF):
     def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
-                self.image(self.logo_stream, x=10, y=8, w=30)
+                self.image(self.logo_stream, x=10, y=8, w=40)
             except Exception as e:
                 print(f"Fout bij laden van logo: {e}")
-        self.set_font('Helvetica', 'B', 18)
+        self.set_font('Helvetica', 'B', 16)
         self.cell(0, 10, bedrijfsnaam, ln=True, align='R')
-        self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, straat, ln=True, align='R')
-        self.cell(0, 10, f"{postcode} {plaats}", ln=True, align='R')
-        self.cell(0, 10, land, ln=True, align='R')
-        self.cell(0, 10, f"KvK: {kvk} | BTW: {btw}", ln=True, align='R')
-        self.cell(0, 10, f"IBAN: {iban}", ln=True, align='R')
-        self.ln(20)
+        self.set_font('Helvetica', '', 11)
+        self.cell(0, 8, straat, ln=True, align='R')
+        self.cell(0, 8, f"{postcode} {plaats}", ln=True, align='R')
+        self.cell(0, 8, land, ln=True, align='R')
+        self.cell(0, 8, f"KvK: {kvk} | BTW: {btw}", ln=True, align='R')
+        self.cell(0, 8, f"IBAN: {iban}", ln=True, align='R')
+        self.ln(5)
+        self.line(10, self.get_y(), 200, self.get_y())
+        self.ln(10)
 
     def factuur_body(self, factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam):
-        self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, f"Factuurnummer: {factuurnummer}", ln=True)
-        self.cell(0, 10, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
+        self.set_font('Helvetica', '', 11)
+        self.cell(0, 8, f"Factuurnummer: {factuurnummer}", ln=True)
+        self.cell(0, 8, f"Datum: {datetime.today().strftime('%d-%m-%Y')}", ln=True)
         self.ln(5)
-        self.cell(0, 10, "Aan:", ln=True)
-        self.cell(0, 10, klantnaam, ln=True)
-        self.cell(0, 10, klant_straat, ln=True)
-        self.cell(0, 10, f"{klant_postcode} {klant_plaats}", ln=True)
-        self.cell(0, 10, klant_land, ln=True)
+        self.set_font('Helvetica', 'B', 12)
+        self.cell(0, 8, "Factuur aan:", ln=True)
+        self.set_font('Helvetica', '', 11)
+        self.cell(0, 8, klantnaam, ln=True)
+        self.cell(0, 8, klant_straat, ln=True)
+        self.cell(0, 8, f"{klant_postcode} {klant_plaats}", ln=True)
+        self.cell(0, 8, klant_land, ln=True)
         self.ln(10)
 
         # Tabel kop
-        self.set_fill_color(200, 220, 255)
-        self.set_font('Helvetica', 'B', 12)
-        self.cell(70, 10, "Omschrijving", border=1, align='C', fill=True)
+        self.set_fill_color(230, 230, 250)
+        self.set_font('Helvetica', 'B', 11)
+        self.cell(80, 10, "Omschrijving", border=1, align='C', fill=True)
         self.cell(20, 10, "Aantal", border=1, align='C', fill=True)
         self.cell(30, 10, "Prijs", border=1, align='C', fill=True)
         self.cell(20, 10, "BTW%", border=1, align='C', fill=True)
@@ -50,14 +54,14 @@ class FactuurPDF(FPDF):
         self.ln()
 
         # Tabel inhoud
-        self.set_font('Helvetica', '', 12)
+        self.set_font('Helvetica', '', 11)
         subtotaal = 0
         totaal_btw = 0
         for dienst, aantal, prijs, btw_percentage in diensten:
             bedrag_excl = aantal * prijs
             btw_bedrag = bedrag_excl * (btw_percentage / 100)
             bedrag_incl = bedrag_excl + btw_bedrag
-            self.cell(70, 10, dienst, border=1)
+            self.cell(80, 10, dienst, border=1)
             self.cell(20, 10, str(aantal), border=1, align='C')
             self.cell(30, 10, f"{prijs:.2f}", border=1, align='R')
             self.cell(20, 10, f"{btw_percentage}%", border=1, align='C')
@@ -69,16 +73,16 @@ class FactuurPDF(FPDF):
         totaal = subtotaal + totaal_btw
         self.ln(5)
         self.set_font('Helvetica', 'B', 12)
-        self.cell(140, 10, "Subtotaal (excl. BTW):", align='R')
+        self.cell(150, 10, "Subtotaal (excl. BTW):", align='R')
         self.cell(30, 10, f"{subtotaal:.2f} EUR", ln=True, align='R')
-        self.cell(140, 10, "Totaal BTW:", align='R')
+        self.cell(150, 10, "Totaal BTW:", align='R')
         self.cell(30, 10, f"{totaal_btw:.2f} EUR", ln=True, align='R')
-        self.cell(140, 10, "Totaal (incl. BTW):", align='R')
+        self.cell(150, 10, "Totaal (incl. BTW):", align='R')
         self.cell(30, 10, f"{totaal:.2f} EUR", ln=True, align='R')
         self.ln(20)
-        self.set_font('Helvetica', '', 12)
-        self.cell(0, 10, "Met vriendelijke groet,", ln=True)
-        self.cell(0, 10, bedrijfsnaam, ln=True)
+        self.set_font('Helvetica', '', 11)
+        self.cell(0, 8, "Met vriendelijke groet,", ln=True)
+        self.cell(0, 8, bedrijfsnaam, ln=True)
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -135,8 +139,7 @@ def index():
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
 
-    html_content = """
-<!doctype html>
+    html_content = """<!doctype html>
 <html lang='nl'>
 <head>
   <meta charset='utf-8'>
@@ -146,8 +149,6 @@ def index():
     body {
       background-color: #f0f4f8;
       font-family: 'Poppins', sans-serif;
-      margin: 0;
-      padding: 0;
     }
     .container {
       max-width: 700px;
@@ -160,25 +161,10 @@ def index():
     h1 {
       text-align: center;
       color: #007bff;
-      font-size: 28px;
-      margin-bottom: 30px;
     }
     h2 {
-      font-size: 18px;
       margin-top: 20px;
-      margin-bottom: 10px;
       color: #333;
-    }
-    .block {
-      padding: 20px;
-      border-radius: 12px;
-      margin-bottom: 20px;
-    }
-    .bedrijf {
-      background-color: #e0f0ff;
-    }
-    .klant {
-      background-color: #ffe6cc;
     }
     label {
       display: block;
@@ -193,6 +179,26 @@ def index():
       border: 1px solid #ccc;
       border-radius: 8px;
       box-sizing: border-box;
+    }
+    .dienst-block {
+      border: 1px solid #ccc;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 10px;
+      position: relative;
+    }
+    .remove-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: red;
+      color: white;
+      border: none;
+      border-radius: 50%;
+      width: 25px;
+      height: 25px;
+      cursor: pointer;
+      font-weight: bold;
     }
     button {
       width: 100%;
@@ -212,77 +218,76 @@ def index():
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>Snelfactuurtje 🚀</h1>
-    <form method="POST" enctype="multipart/form-data">
-      <label>Factuurnummer:</label>
-      <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
-      <div class="block bedrijf">
-        <h2>🏢 Bedrijfsgegevens</h2>
-        <label>Bedrijfsnaam:</label>
-        <input name="bedrijfsnaam" required>
-        <label>Straat en huisnummer:</label>
-        <input name="straat" required>
-        <label>Postcode:</label>
-        <input name="postcode" required>
-        <label>Plaats:</label>
-        <input name="plaats" required>
-        <label>Land:</label>
-        <input name="land" required>
-        <label>KvK-nummer:</label>
-        <input name="kvk" required>
-        <label>BTW-nummer:</label>
-        <input name="btw" required>
-        <label>IBAN-nummer:</label>
-        <input name="iban" required>
-      </div>
-      <div class="block klant">
-        <h2>🧑‍💼 Klantgegevens</h2>
-        <label>Klantnaam:</label>
-        <input name="klantnaam" required>
-        <label>Straat en huisnummer:</label>
-        <input name="klant_straat" required>
-        <label>Postcode:</label>
-        <input name="klant_postcode" required>
-        <label>Plaats:</label>
-        <input name="klant_plaats" required>
-        <label>Land:</label>
-        <input name="klant_land" required>
-      </div>
-      <div id="diensten"></div>
-      <button type="button" onclick="voegDienstToe()">➕ Dienst toevoegen</button>
-      <label>Upload jouw logo (optioneel):</label>
-      <input type="file" name="logo">
-      <button type="submit">📄 Factuur Downloaden</button>
-    </form>
-  </div>
-  <script>
-    let dienstIndex = 0;
-    function voegDienstToe() {
-      const container = document.getElementById('diensten');
-      const html = `
-        <div>
-          <label>Dienst:</label>
-          <input name="dienst_${dienstIndex}" required>
-          <label>Aantal:</label>
-          <input name="aantal_${dienstIndex}" type="number" required>
-          <label>Prijs per stuk:</label>
-          <input name="prijs_${dienstIndex}" type="number" step="0.01" required>
-          <label>BTW-percentage:</label>
-          <select name="btw_${dienstIndex}">
-            <option value="0">0%</option>
-            <option value="9">9%</option>
-            <option value="21" selected>21%</option>
-          </select>
-        </div>
-      `;
-      container.insertAdjacentHTML('beforeend', html);
-      dienstIndex++;
-    }
-  </script>
+<div class='container'>
+  <h1>Snelfactuurtje 🚀</h1>
+  <form method='POST' enctype='multipart/form-data'>
+    <label>Factuurnummer:</label>
+    <input name='factuurnummer' placeholder='Bijv. FACT-2025-001' required>
+
+    <label>Bedrijfsnaam:</label>
+    <input name='bedrijfsnaam' required>
+    <label>Straat en huisnummer:</label>
+    <input name='straat' required>
+    <label>Postcode:</label>
+    <input name='postcode' required>
+    <label>Plaats:</label>
+    <input name='plaats' required>
+    <label>Land:</label>
+    <input name='land' required>
+    <label>KvK-nummer:</label>
+    <input name='kvk' required>
+    <label>BTW-nummer:</label>
+    <input name='btw' required>
+    <label>IBAN-nummer:</label>
+    <input name='iban' required>
+
+    <h2>🧑‍💼 Klantgegevens</h2>
+    <label>Klantnaam:</label>
+    <input name='klantnaam' required>
+    <label>Straat en huisnummer:</label>
+    <input name='klant_straat' required>
+    <label>Postcode:</label>
+    <input name='klant_postcode' required>
+    <label>Plaats:</label>
+    <input name='klant_plaats' required>
+    <label>Land:</label>
+    <input name='klant_land' required>
+
+    <div id='diensten'></div>
+    <button type='button' onclick='voegDienstToe()'>➕ Dienst toevoegen</button>
+
+    <label>Upload jouw logo (optioneel):</label>
+    <input type='file' name='logo'>
+    <button type='submit'>📄 Factuur Downloaden</button>
+  </form>
+</div>
+<script>
+  let dienstIndex = 0;
+  function voegDienstToe() {
+    const container = document.getElementById('diensten');
+    const div = document.createElement('div');
+    div.className = 'dienst-block';
+    div.innerHTML = `
+      <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>×</button>
+      <label>Dienst:</label>
+      <input name='dienst_${dienstIndex}' required>
+      <label>Aantal:</label>
+      <input name='aantal_${dienstIndex}' type='number' required>
+      <label>Prijs per stuk:</label>
+      <input name='prijs_${dienstIndex}' type='number' step='0.01' required>
+      <label>BTW-percentage:</label>
+      <select name='btw_${dienstIndex}'>
+        <option value='0'>0%</option>
+        <option value='9'>9%</option>
+        <option value='21' selected>21%</option>
+      </select>
+    `;
+    container.appendChild(div);
+    dienstIndex++;
+  }
+</script>
 </body>
-</html>
-"""
+</html>"""
     return render_template_string(html_content)
 
 if __name__ == '__main__':
