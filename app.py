@@ -15,7 +15,13 @@ class FactuurPDF(FPDF):
     def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
             try:
-                self.image(self.logo_stream, x=10, y=8, w=40)
+                
+temp_logo_path = 'temp_logo.png'
+with open(temp_logo_path, 'wb') as f:
+    f.write(self.logo_stream.getbuffer())
+self.image(temp_logo_path, x=10, y=8, w=40)
+os.remove(temp_logo_path)
+
             except Exception as e:
                 print(f"Fout bij laden van logo: {e}")
         self.set_font('Helvetica', 'B', 16)
@@ -86,7 +92,13 @@ class FactuurPDF(FPDF):
         if handtekening_stream:
             self.ln(20)
             self.cell(0, 8, "Handtekening:", ln=True)
-            self.image(handtekening_stream, x=10, y=self.get_y(), w=60)
+            
+temp_handtekening_path = 'temp_handtekening.png'
+with open(temp_handtekening_path, 'wb') as f:
+    f.write(handtekening_stream.getbuffer())
+self.image(temp_handtekening_path, x=10, y=self.get_y(), w=60)
+os.remove(temp_handtekening_path)
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
