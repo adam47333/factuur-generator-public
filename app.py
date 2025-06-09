@@ -155,12 +155,14 @@ def index():
 
             pdf_data = pdf.output(dest='S').encode('latin-1')
 
-            return send_file(
+            response = send_file(
                 io.BytesIO(pdf_data),
+                mimetype='application/pdf',
                 as_attachment=True,
                 download_name=f'{factuurnummer}.pdf',
-                mimetype='application/pdf'
             )
+            response.headers["Cache-Control"] = "no-store"
+            return response
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
 
