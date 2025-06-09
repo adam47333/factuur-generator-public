@@ -155,23 +155,27 @@ def index():
 
             pdf_data = pdf.output(dest='S').encode('latin-1')
 
+            # PDF inline openen, niet downloaden:
             return send_file(
                 io.BytesIO(pdf_data),
+                as_attachment=False,
+                download_name=f'{factuurnummer}.pdf',
                 mimetype='application/pdf',
-                as_attachment=True,
-                attachment_filename=f'{factuurnummer}.pdf'
+                conditional=True,
+                etag=True
             )
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
 
+    # HTML + CSS + JS, responsief en handtekening zoals gevraagd:
     html_content = '''
 <!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Snelfactuurtje</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
   <style>
     body {
       background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
@@ -191,12 +195,35 @@ def index():
       border-radius: 15px;
       box-shadow: 0 10px 30px rgba(0,0,0,0.1);
     }
-    h1 { text-align: center; color: #007bff; margin-bottom: 30px; }
-    form { display: flex; flex-direction: column; gap: 20px; }
-    .block { padding: 20px; border-radius: 12px; margin-bottom: 20px; background-color: #f9f9f9; }
-    .bedrijf { background-color: #e6f2ff; }
-    .klant { background-color: #fff3e6; }
-    label { display: block; margin-top: 10px; font-weight: 500; font-size: 14px; color: #555; }
+    h1 {
+      text-align: center;
+      color: #007bff;
+      margin-bottom: 30px;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+    .block {
+      padding: 20px;
+      border-radius: 12px;
+      margin-bottom: 20px;
+      background-color: #f9f9f9;
+    }
+    .bedrijf {
+      background-color: #e6f2ff;
+    }
+    .klant {
+      background-color: #fff3e6;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+      font-weight: 500;
+      font-size: 14px;
+      color: #555;
+    }
     input, select {
       width: 100%;
       padding: 12px;
@@ -243,8 +270,15 @@ def index():
       cursor: pointer;
       transition: background 0.3s;
     }
-    button:hover { background-color: #0056b3; }
-    .button-group { display: flex; flex-direction: column; gap: 10px; margin-top: 15px; }
+    button:hover {
+      background-color: #0056b3;
+    }
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-top: 15px;
+    }
     canvas {
       border: 2px solid #ccc;
       border-radius: 8px;
@@ -252,39 +286,46 @@ def index():
       width: 100%;
       height: 200px;
     }
+    .form-grid {
+      display: block;
+    }
     @media (min-width: 768px) {
-      .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+      .form-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="container">
     <h1>Snelfactuurtje</h1>
-    <form method="POST" enctype="multipart/form-data">
+    <form method="POST" enctype="multipart/form-data" target="_blank">
       <label>Factuurnummer:</label>
-      <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
+      <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required />
 
       <div class="form-grid">
         <div class="block bedrijf">
           <h2>Bedrijfsgegevens</h2>
           <label>Bedrijfsnaam:</label>
-          <input name="bedrijfsnaam" required>
+          <input name="bedrijfsnaam" required />
           <label>Straat en huisnummer:</label>
-          <input name="straat" required>
+          <input name="straat" required />
           <label>Postcode:</label>
-          <input name="postcode" required>
+          <input name="postcode" required />
           <label>Plaats:</label>
-          <input name="plaats" required>
+          <input name="plaats" required />
           <label>Land:</label>
-          <input name="land" required>
+          <input name="land" required />
           <label>KvK-nummer:</label>
-          <input name="kvk" required>
+          <input name="kvk" required />
           <label>BTW-nummer:</label>
-          <input name="btw" required>
+          <input name="btw" required />
           <label>IBAN-nummer:</label>
-          <input name="iban" required>
+          <input name="iban" required />
           <label>Upload jouw logo (optioneel):</label>
-          <input type="file" name="logo">
+          <input type="file" name="logo" />
 
           <div class="button-group">
             <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
@@ -295,15 +336,15 @@ def index():
         <div class="block klant">
           <h2>Klantgegevens</h2>
           <label>Klantnaam:</label>
-          <input name="klantnaam" required>
+          <input name="klantnaam" required />
           <label>Straat en huisnummer:</label>
-          <input name="klant_straat" required>
+          <input name="klant_straat" required />
           <label>Postcode:</label>
-          <input name="klant_postcode" required>
+          <input name="klant_postcode" required />
           <label>Plaats:</label>
-          <input name="klant_plaats" required>
+          <input name="klant_plaats" required />
           <label>Land:</label>
-          <input name="klant_land" required>
+          <input name="klant_land" required />
         </div>
       </div>
 
@@ -313,9 +354,9 @@ def index():
       <h2>Handtekening</h2>
       <canvas id="signature-pad"></canvas>
       <button type="button" onclick="clearSignature()">Handtekening wissen</button>
-      <input type="hidden" id="handtekening" name="handtekening">
+      <input type="hidden" id="handtekening" name="handtekening" />
 
-      <button type="submit">Factuur Downloaden</button>
+      <button type="submit">Factuur Openen</button>
     </form>
   </div>
 
@@ -329,11 +370,11 @@ def index():
       div.innerHTML = `
         <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>×</button>
         <label>Dienst:</label>
-        <input name='dienst_${dienstIndex}' required>
+        <input name='dienst_${dienstIndex}' required />
         <label>Aantal:</label>
-        <input name='aantal_${dienstIndex}' type='number' required>
+        <input name='aantal_${dienstIndex}' type='number' required />
         <label>Prijs per stuk:</label>
-        <input name='prijs_${dienstIndex}' type='number' step='0.01' required>
+        <input name='prijs_${dienstIndex}' type='number' step='0.01' required />
         <label>BTW-percentage:</label>
         <select name='btw_${dienstIndex}'>
           <option value='0'>0%</option>
@@ -346,15 +387,26 @@ def index():
     }
 
     var canvas = document.getElementById('signature-pad');
+    var signaturePad;
+
     function resizeCanvas() {
-        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
+      if (!signaturePad) return;
+      const data = signaturePad.toData();
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext('2d').scale(ratio, ratio);
+      signaturePad.clear();
+      signaturePad.fromData(data);
     }
-    window.addEventListener("resize", resizeCanvas);
-    resizeCanvas();
-    var signaturePad = new SignaturePad(canvas);
+
+    window.addEventListener('resize', resizeCanvas);
+
+    window.onload = function () {
+      signaturePad = new SignaturePad(canvas);
+      resizeCanvas();
+      loadCompanyInfo();
+    };
 
     function saveSignature() {
       if (!signaturePad.isEmpty()) {
@@ -369,7 +421,7 @@ def index():
 
     function saveCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         const value = document.querySelector(`[name="${field}"]`).value;
         localStorage.setItem(field, value);
       });
@@ -378,7 +430,7 @@ def index():
 
     function loadCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         const saved = localStorage.getItem(field);
         if (saved) {
           document.querySelector(`[name="${field}"]`).value = saved;
@@ -388,22 +440,23 @@ def index():
 
     function clearCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         localStorage.removeItem(field);
         document.querySelector(`[name="${field}"]`).value = '';
       });
       alert('Bedrijfsgegevens gewist!');
     }
 
-    document.querySelector("form").addEventListener("submit", saveSignature);
-    window.onload = function() {
-      loadCompanyInfo();
-    };
+    document.querySelector('form').addEventListener('submit', function (e) {
+      saveSignature();
+      // Form heeft target="_blank", dus PDF opent in nieuw tab
+    });
   </script>
 </body>
 </html>
 '''
     return render_template_string(html_content)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
