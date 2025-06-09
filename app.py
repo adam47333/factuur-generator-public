@@ -95,15 +95,14 @@ class FactuurPDF(FPDF):
         self.cell(0, 8, bedrijfsnaam, ln=True)
 
         if handtekening_stream:
-            handtekening_hoogte = 50  # hoogte in mm van handtekening afbeelding
-            marge_onderkant = 15
-            huidige_y = self.get_y()
-            beschikbare_ruimte = self.h - marge_onderkant - huidige_y
-            if beschikbare_ruimte < handtekening_hoogte + 10:  # 10mm marge
+            # Zorg dat handtekening zichtbaar blijft op dezelfde pagina tenzij echt te veel content
+            y_pos = self.get_y()
+            if y_pos > 200:
                 self.add_page()
+                y_pos = 30
             else:
-                # Zet cursor ongeveer onderaan pagina 1 als er ruimte is
-                self.set_y(self.h - marge_onderkant - handtekening_hoogte - 10)
+                y_pos += 20
+            self.set_y(y_pos)
             self.cell(0, 8, "Handtekening:", ln=True)
             temp_handtekening_path = 'temp_handtekening.png'
             with open(temp_handtekening_path, 'wb') as f:
@@ -165,7 +164,14 @@ def index():
                 io.BytesIO(pdf_data),
                 as_attachment=True,
                 download_name=f'{factuurnummer}.pdf',
-                mimetype='application/pdf'
+                mimetype='application/pdf',
+                conditional=False,
+                headers={
+                    "Content-Disposition": f"attachment; filename={factuurnummer}.pdf",
+                    "Cache-Control": "no-cache, no-store, must-revalidate",
+                    "Pragma": "no-cache",
+                    "Expires": "0"
+                }
             )
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
