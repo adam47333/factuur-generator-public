@@ -95,14 +95,9 @@ class FactuurPDF(FPDF):
         self.cell(0, 8, bedrijfsnaam, ln=True)
 
         if handtekening_stream:
-            # Zorg dat handtekening zichtbaar blijft op dezelfde pagina tenzij echt te veel content
-            y_pos = self.get_y()
-            if y_pos > 200:
+            if self.get_y() > 250:
                 self.add_page()
-                y_pos = 30
-            else:
-                y_pos += 20
-            self.set_y(y_pos)
+            self.ln(20)
             self.cell(0, 8, "Handtekening:", ln=True)
             temp_handtekening_path = 'temp_handtekening.png'
             with open(temp_handtekening_path, 'wb') as f:
@@ -164,14 +159,7 @@ def index():
                 io.BytesIO(pdf_data),
                 as_attachment=True,
                 download_name=f'{factuurnummer}.pdf',
-                mimetype='application/pdf',
-                conditional=False,
-                headers={
-                    "Content-Disposition": f"attachment; filename={factuurnummer}.pdf",
-                    "Cache-Control": "no-cache, no-store, must-revalidate",
-                    "Pragma": "no-cache",
-                    "Expires": "0"
-                }
+                mimetype='application/pdf'
             )
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
@@ -368,13 +356,12 @@ def index():
     resizeCanvas();
     var signaturePad = new SignaturePad(canvas);
 
-    // Bij submit wordt handtekening opgeslagen in verborgen input
-    document.querySelector("form").addEventListener("submit", function(event) {
+    function saveSignature() {
       if (!signaturePad.isEmpty()) {
         var dataURL = signaturePad.toDataURL();
         document.getElementById('handtekening').value = dataURL;
       }
-    });
+    }
 
     function clearSignature() {
       signaturePad.clear();
@@ -408,6 +395,7 @@ def index():
       alert('Bedrijfsgegevens gewist!');
     }
 
+    document.querySelector("form").addEventListener("submit", saveSignature);
     window.onload = function() {
       loadCompanyInfo();
     };
