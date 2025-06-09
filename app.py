@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask, request, send_file, render_template_string, abort
+from flask import Flask, request, make_response, render_template_string, abort
 from fpdf import FPDF
 import io
 from datetime import datetime
@@ -155,12 +155,13 @@ def index():
 
             pdf_data = pdf.output(dest='S').encode('latin-1')
 
-            return send_file(
-                io.BytesIO(pdf_data),
-                as_attachment=True,
-                download_name=f'{factuurnummer}.pdf',
-                mimetype='application/pdf'
-            )
+            response = make_response(pdf_data)
+            response.headers['Content-Type'] = 'application/pdf'
+            response.headers['Content-Disposition'] = f'inline; filename="{factuurnummer}.pdf"'
+            response.headers['Cache-Control'] = 'no-store'
+            response.headers['Content-Length'] = str(len(pdf_data))
+            return response
+
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
 
