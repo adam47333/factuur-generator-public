@@ -157,10 +157,9 @@ def index():
 
             return send_file(
                 io.BytesIO(pdf_data),
+                as_attachment=True,
                 download_name=f'{factuurnummer}.pdf',
-                mimetype='application/pdf',
-                as_attachment=False,  # PDF opent inline (in browser/viewer)
-                conditional=True
+                mimetype='application/pdf'
             )
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
