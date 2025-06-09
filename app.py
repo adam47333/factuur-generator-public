@@ -1,17 +1,12 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask, request, send_file, render_template_string, abort
+from flask import Flask, request, make_response, render_template_string, abort
 from fpdf import FPDF
 import io
 from datetime import datetime
 import base64
 
 app = Flask(__name__)
-
-@app.after_request
-def add_header(response):
-    response.headers["Content-Type"] = "text/html; charset=utf-8"
-    return response
 
 class FactuurPDF(FPDF):
     def __init__(self, logo_stream=None):
@@ -155,16 +150,14 @@ def index():
 
             pdf_data = pdf.output(dest='S').encode('latin-1')
 
-            response = send_file(
-                io.BytesIO(pdf_data),
-                mimetype='application/pdf',
-                as_attachment=True,
-                download_name=f'{factuurnummer}.pdf',
-            )
-            response.headers["Content-Disposition"] = f"attachment; filename={factuurnummer}.pdf"
-            response.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
-            response.headers["Pragma"] = "no-cache"
-            response.headers["Expires"] = "0"
+            response = make_response(pdf_data)
+            response.headers.set('Content-Type', 'application/pdf')
+            response.headers.set('Content-Disposition', f'attachment; filename="{factuurnummer}.pdf"')
+            response.headers.set('Content-Transfer-Encoding', 'binary')
+            response.headers.set('Cache-Control', 'no-cache, no-store, must-revalidate')
+            response.headers.set('Pragma', 'no-cache')
+            response.headers.set('Expires', '0')
+
             return response
         except Exception as e:
             abort(400, description=f"Fout bij verwerken van factuur: {e}")
@@ -173,10 +166,10 @@ def index():
 <!doctype html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Snelfactuurtje</title>
-  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
   <style>
     body {
       background: linear-gradient(135deg, #e0f7fa 0%, #ffffff 100%);
@@ -267,29 +260,29 @@ def index():
     <h1>Snelfactuurtje</h1>
     <form method="POST" enctype="multipart/form-data">
       <label>Factuurnummer:</label>
-      <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required>
+      <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required />
 
       <div class="form-grid">
         <div class="block bedrijf">
           <h2>Bedrijfsgegevens</h2>
           <label>Bedrijfsnaam:</label>
-          <input name="bedrijfsnaam" required>
+          <input name="bedrijfsnaam" required />
           <label>Straat en huisnummer:</label>
-          <input name="straat" required>
+          <input name="straat" required />
           <label>Postcode:</label>
-          <input name="postcode" required>
+          <input name="postcode" required />
           <label>Plaats:</label>
-          <input name="plaats" required>
+          <input name="plaats" required />
           <label>Land:</label>
-          <input name="land" required>
+          <input name="land" required />
           <label>KvK-nummer:</label>
-          <input name="kvk" required>
+          <input name="kvk" required />
           <label>BTW-nummer:</label>
-          <input name="btw" required>
+          <input name="btw" required />
           <label>IBAN-nummer:</label>
-          <input name="iban" required>
+          <input name="iban" required />
           <label>Upload jouw logo (optioneel):</label>
-          <input type="file" name="logo">
+          <input type="file" name="logo" />
 
           <div class="button-group">
             <button type="button" onclick="saveCompanyInfo()">Bedrijfsgegevens opslaan</button>
@@ -300,15 +293,15 @@ def index():
         <div class="block klant">
           <h2>Klantgegevens</h2>
           <label>Klantnaam:</label>
-          <input name="klantnaam" required>
+          <input name="klantnaam" required />
           <label>Straat en huisnummer:</label>
-          <input name="klant_straat" required>
+          <input name="klant_straat" required />
           <label>Postcode:</label>
-          <input name="klant_postcode" required>
+          <input name="klant_postcode" required />
           <label>Plaats:</label>
-          <input name="klant_plaats" required>
+          <input name="klant_plaats" required />
           <label>Land:</label>
-          <input name="klant_land" required>
+          <input name="klant_land" required />
         </div>
       </div>
 
@@ -318,7 +311,7 @@ def index():
       <h2>Handtekening</h2>
       <canvas id="signature-pad"></canvas>
       <button type="button" onclick="clearSignature()">Handtekening wissen</button>
-      <input type="hidden" id="handtekening" name="handtekening">
+      <input type="hidden" id="handtekening" name="handtekening" />
 
       <button type="submit">Factuur Downloaden</button>
     </form>
@@ -334,11 +327,11 @@ def index():
       div.innerHTML = `
         <button type='button' class='remove-btn' onclick='this.parentNode.remove()'>×</button>
         <label>Dienst:</label>
-        <input name='dienst_${dienstIndex}' required>
+        <input name='dienst_${dienstIndex}' required />
         <label>Aantal:</label>
-        <input name='aantal_${dienstIndex}' type='number' required>
+        <input name='aantal_${dienstIndex}' type='number' required />
         <label>Prijs per stuk:</label>
-        <input name='prijs_${dienstIndex}' type='number' step='0.01' required>
+        <input name='prijs_${dienstIndex}' type='number' step='0.01' required />
         <label>BTW-percentage:</label>
         <select name='btw_${dienstIndex}'>
           <option value='0'>0%</option>
@@ -352,12 +345,12 @@ def index():
 
     var canvas = document.getElementById('signature-pad');
     function resizeCanvas() {
-        const ratio =  Math.max(window.devicePixelRatio || 1, 1);
-        canvas.width = canvas.offsetWidth * ratio;
-        canvas.height = canvas.offsetHeight * ratio;
-        canvas.getContext("2d").scale(ratio, ratio);
+      const ratio = Math.max(window.devicePixelRatio || 1, 1);
+      canvas.width = canvas.offsetWidth * ratio;
+      canvas.height = canvas.offsetHeight * ratio;
+      canvas.getContext('2d').scale(ratio, ratio);
     }
-    window.addEventListener("resize", resizeCanvas);
+    window.addEventListener('resize', resizeCanvas);
     resizeCanvas();
     var signaturePad = new SignaturePad(canvas);
 
@@ -374,7 +367,7 @@ def index():
 
     function saveCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         const value = document.querySelector(`[name="${field}"]`).value;
         localStorage.setItem(field, value);
       });
@@ -383,7 +376,7 @@ def index():
 
     function loadCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         const saved = localStorage.getItem(field);
         if (saved) {
           document.querySelector(`[name="${field}"]`).value = saved;
@@ -393,22 +386,24 @@ def index():
 
     function clearCompanyInfo() {
       const fields = ['bedrijfsnaam', 'straat', 'postcode', 'plaats', 'land', 'kvk', 'btw', 'iban'];
-      fields.forEach(field => {
+      fields.forEach((field) => {
         localStorage.removeItem(field);
         document.querySelector(`[name="${field}"]`).value = '';
       });
       alert('Bedrijfsgegevens gewist!');
     }
 
-    document.querySelector("form").addEventListener("submit", saveSignature);
-    window.onload = function() {
+    document.querySelector('form').addEventListener('submit', saveSignature);
+    window.onload = function () {
       loadCompanyInfo();
+      voegDienstToe(); // Voeg automatisch 1 dienst toe bij laden
     };
   </script>
 </body>
 </html>
 '''
     return render_template_string(html_content)
+
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
