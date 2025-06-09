@@ -12,7 +12,6 @@ app = Flask(__name__)
 
 pdf_storage = {}
 
-# Vertalingen per taalcode
 translations = {
     'nl': {
         'title': 'Snelfactuurtje',
@@ -387,10 +386,10 @@ translations = {
 }
 
 class FactuurPDF(FPDF):
-    def __init__(self, logo_stream=None, translations=None):
+    def __init__(self, logo_stream=None, t=None):
         super().__init__()
         self.logo_stream = logo_stream
-        self.t = translations or translations['nl']
+        self.t = t or translations['nl']
 
     def header_custom(self, bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban):
         if self.logo_stream:
@@ -635,16 +634,16 @@ def index():
     <form id="languageForm" class="language-select" method="GET" action="/">
       <label for="langSelect">{t["language"]}:</label>
       <select id="langSelect" name="lang" onchange="document.getElementById('languageForm').submit()">
-        <option value="nl" {'selected' if lang=='nl' else ''}>Nederlands</option>
-        <option value="de" {'selected' if lang=='de' else ''}>Deutsch</option>
-        <option value="fr" {'selected' if lang=='fr' else ''}>Français</option>
-        <option value="it" {'selected' if lang=='it' else ''}>Italiano</option>
-        <option value="es" {'selected' if lang=='es' else ''}>Español</option>
-        <option value="pt" {'selected' if lang=='pt' else ''}>Português</option>
-        <option value="ja" {'selected' if lang=='ja' else ''}>日本語</option>
-        <option value="zh" {'selected' if lang=='zh' else ''}>中文</option>
-        <option value="ar" {'selected' if lang=='ar' else ''}>العربية</option>
-        <option value="en" {'selected' if lang=='en' else ''}>English</option>
+        <option value="nl" {'selected' if lang == 'nl' else ''}>Nederlands</option>
+        <option value="de" {'selected' if lang == 'de' else ''}>Deutsch</option>
+        <option value="fr" {'selected' if lang == 'fr' else ''}>Français</option>
+        <option value="it" {'selected' if lang == 'it' else ''}>Italiano</option>
+        <option value="es" {'selected' if lang == 'es' else ''}>Español</option>
+        <option value="pt" {'selected' if lang == 'pt' else ''}>Português</option>
+        <option value="ja" {'selected' if lang == 'ja' else ''}>日本語</option>
+        <option value="zh" {'selected' if lang == 'zh' else ''}>中文</option>
+        <option value="ar" {'selected' if lang == 'ar' else ''}>العربية</option>
+        <option value="en" {'selected' if lang == 'en' else ''}>English</option>
       </select>
     </form>
 
@@ -848,7 +847,7 @@ def generate_pdf():
 
         t, lang = get_translation()
 
-        pdf = FactuurPDF(logo_stream, translations=t)
+        pdf = FactuurPDF(logo_stream, t)
         pdf.add_page()
         pdf.header_custom(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
         pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam, handtekening_stream)
@@ -858,7 +857,7 @@ def generate_pdf():
         pdf_id = str(uuid.uuid4())
         pdf_storage[pdf_id] = pdf_data
 
-        return redirect(url_for('serve_pdf', pdf_id=pdf_id, lang=lang))
+        return redirect(url_for('serve_pdf', pdf_id=pdf_id))
     except Exception as e:
         abort(400, description=f"Fout bij verwerken van factuur: {e}")
 
