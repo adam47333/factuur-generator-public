@@ -153,8 +153,7 @@ def index():
             pdf.header_custom(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
             pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam, handtekening_stream)
 
-            pdf_str = pdf.output(dest='S')
-            pdf_data = pdf_str.encode('latin-1')
+            pdf_data = pdf.output(dest='S').encode('latin-1')
 
             return send_file(
                 io.BytesIO(pdf_data),
