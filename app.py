@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
 import os
-from flask import Flask, request, send_file, render_template_string, abort
-from fpdf import FPDF
 import io
-from datetime import datetime
 import base64
+import uuid
+from datetime import datetime
+from flask import Flask, request, send_file, render_template_string, abort, redirect, url_for
+from fpdf import FPDF
 
 app = Flask(__name__)
 
-@app.after_request
-def add_header(response):
-    response.headers["Content-Type"] = "text/html; charset=utf-8"
-    return response
+# Tijdelijke opslag voor PDF's (in geheugen)
+pdf_storage = {}
 
 class FactuurPDF(FPDF):
     def __init__(self, logo_stream=None):
@@ -105,69 +104,8 @@ class FactuurPDF(FPDF):
             self.image(temp_handtekening_path, x=10, y=self.get_y(), w=80)
             os.remove(temp_handtekening_path)
 
-@app.route('/', methods=['GET', 'POST'])
+@app.route('/', methods=['GET'])
 def index():
-    if request.method == 'POST':
-        try:
-            factuurnummer = request.form['factuurnummer']
-            bedrijfsnaam = request.form['bedrijfsnaam']
-            straat = request.form['straat']
-            postcode = request.form['postcode']
-            plaats = request.form['plaats']
-            land = request.form['land']
-            kvk = request.form['kvk']
-            btw = request.form['btw']
-            iban = request.form['iban']
-
-            klantnaam = request.form['klantnaam']
-            klant_straat = request.form['klant_straat']
-            klant_postcode = request.form['klant_postcode']
-            klant_plaats = request.form['klant_plaats']
-            klant_land = request.form['klant_land']
-
-            diensten = []
-            index = 0
-            while f'dienst_{index}' in request.form:
-                dienst = request.form.get(f'dienst_{index}')
-                aantal = int(request.form.get(f'aantal_{index}', 1))
-                prijs = float(request.form.get(f'prijs_{index}', 0))
-                btw_percentage = float(request.form.get(f'btw_{index}', 21))
-                diensten.append((dienst, aantal, prijs, btw_percentage))
-                index += 1
-
-            logo_file = request.files.get('logo')
-            logo_stream = None
-            if logo_file and logo_file.filename:
-                logo_stream = io.BytesIO(logo_file.read())
-                logo_stream.seek(0)
-
-            handtekening_data = request.form.get('handtekening')
-            handtekening_stream = None
-            if handtekening_data and handtekening_data.startswith("data:image/png;base64,"):
-                header, encoded = handtekening_data.split(",", 1)
-                handtekening_bytes = base64.b64decode(encoded)
-                handtekening_stream = io.BytesIO(handtekening_bytes)
-
-            pdf = FactuurPDF(logo_stream)
-            pdf.add_page()
-            pdf.header_custom(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
-            pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam, handtekening_stream)
-
-            pdf_data = pdf.output(dest='S').encode('latin-1')
-
-            # PDF inline openen, niet downloaden:
-            return send_file(
-                io.BytesIO(pdf_data),
-                as_attachment=False,
-                download_name=f'{factuurnummer}.pdf',
-                mimetype='application/pdf',
-                conditional=True,
-                etag=True
-            )
-        except Exception as e:
-            abort(400, description=f"Fout bij verwerken van factuur: {e}")
-
-    # HTML + CSS + JS, responsief en handtekening zoals gevraagd:
     html_content = '''
 <!doctype html>
 <html lang="nl">
@@ -301,7 +239,7 @@ def index():
 <body>
   <div class="container">
     <h1>Snelfactuurtje</h1>
-    <form method="POST" enctype="multipart/form-data" target="_blank">
+    <form method="POST" action="/generate" enctype="multipart/form-data">
       <label>Factuurnummer:</label>
       <input name="factuurnummer" placeholder="Bijv. FACT-2025-001" required />
 
@@ -449,7 +387,6 @@ def index():
 
     document.querySelector('form').addEventListener('submit', function (e) {
       saveSignature();
-      // Form heeft target="_blank", dus PDF opent in nieuw tab
     });
   </script>
 </body>
@@ -457,6 +394,73 @@ def index():
 '''
     return render_template_string(html_content)
 
+@app.route('/generate', methods=['POST'])
+def generate_pdf():
+    try:
+        factuurnummer = request.form['factuurnummer']
+        bedrijfsnaam = request.form['bedrijfsnaam']
+        straat = request.form['straat']
+        postcode = request.form['postcode']
+        plaats = request.form['plaats']
+        land = request.form['land']
+        kvk = request.form['kvk']
+        btw = request.form['btw']
+        iban = request.form['iban']
+
+        klantnaam = request.form['klantnaam']
+        klant_straat = request.form['klant_straat']
+        klant_postcode = request.form['klant_postcode']
+        klant_plaats = request.form['klant_plaats']
+        klant_land = request.form['klant_land']
+
+        diensten = []
+        index = 0
+        while f'dienst_{index}' in request.form:
+            dienst = request.form.get(f'dienst_{index}')
+            aantal = int(request.form.get(f'aantal_{index}', 1))
+            prijs = float(request.form.get(f'prijs_{index}', 0))
+            btw_percentage = float(request.form.get(f'btw_{index}', 21))
+            diensten.append((dienst, aantal, prijs, btw_percentage))
+            index += 1
+
+        logo_file = request.files.get('logo')
+        logo_stream = None
+        if logo_file and logo_file.filename:
+            logo_stream = io.BytesIO(logo_file.read())
+            logo_stream.seek(0)
+
+        handtekening_data = request.form.get('handtekening')
+        handtekening_stream = None
+        if handtekening_data and handtekening_data.startswith("data:image/png;base64,"):
+            header, encoded = handtekening_data.split(",", 1)
+            handtekening_bytes = base64.b64decode(encoded)
+            handtekening_stream = io.BytesIO(handtekening_bytes)
+
+        pdf = FactuurPDF(logo_stream)
+        pdf.add_page()
+        pdf.header_custom(bedrijfsnaam, straat, postcode, plaats, land, kvk, btw, iban)
+        pdf.factuur_body(factuurnummer, klantnaam, klant_straat, klant_postcode, klant_plaats, klant_land, diensten, bedrijfsnaam, handtekening_stream)
+
+        pdf_data = pdf.output(dest='S').encode('latin-1')
+
+        pdf_id = str(uuid.uuid4())
+        pdf_storage[pdf_id] = pdf_data
+
+        return redirect(url_for('serve_pdf', pdf_id=pdf_id))
+    except Exception as e:
+        abort(400, description=f"Fout bij verwerken van factuur: {e}")
+
+@app.route('/pdf/<pdf_id>', methods=['GET'])
+def serve_pdf(pdf_id):
+    pdf_data = pdf_storage.get(pdf_id)
+    if not pdf_data:
+        abort(404)
+    return send_file(
+        io.BytesIO(pdf_data),
+        mimetype='application/pdf',
+        as_attachment=False,
+        download_name='factuur.pdf'
+    )
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
